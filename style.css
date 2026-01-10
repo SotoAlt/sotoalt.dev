@@ -1,0 +1,630 @@
+/* =============================================================================
+   sotoalt.com - minimal terminal aesthetic
+   ============================================================================= */
+
+:root {
+    --bg: #0a0a0a;
+    --bg-alt: #0f0f0f;
+    --fg: #e0e0e0;
+    --fg-dim: #8a8a8a;
+    --fg-muted: #555;
+    --accent: #7aa2f7;
+    --accent-dim: #3d59a1;
+    --green: #9ece6a;
+    --purple: #c4a7e7;
+    --orange: #e0af68;
+    --red: #f7768e;
+    --font-mono: 'SF Mono', 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+    --max-width: 680px;
+}
+
+/* Reset */
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+/* Base */
+html {
+    font-size: 16px;
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: var(--font-mono);
+    font-size: 0.9375rem;
+    line-height: 1.7;
+    color: var(--fg);
+    background: var(--bg);
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+::selection {
+    background: var(--accent);
+    color: var(--bg);
+}
+
+/* Layout */
+main {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    padding: 4rem 1.5rem;
+}
+
+/* Header */
+header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.sigil {
+    font-size: 0.6rem;
+    line-height: 1.2;
+    color: var(--fg-muted);
+    margin-bottom: 1.5rem;
+    opacity: 0.6;
+}
+
+h1 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: lowercase;
+    color: var(--fg);
+    margin-bottom: 0.25rem;
+    text-shadow: 0 0 20px rgba(122, 162, 247, 0.15);
+}
+
+.tagline {
+    font-size: 0.8125rem;
+    color: var(--fg-dim);
+    font-style: italic;
+}
+
+/* Navigation */
+nav {
+    text-align: center;
+    margin: 2rem 0;
+}
+
+nav a {
+    color: var(--fg-dim);
+    text-decoration: none;
+    font-size: 0.8125rem;
+    transition: color 0.2s;
+}
+
+nav a:hover {
+    color: var(--accent);
+}
+
+nav .sep {
+    color: var(--fg-muted);
+    margin: 0 0.75rem;
+}
+
+/* Sections */
+section {
+    margin: 2.5rem 0;
+}
+
+h2 {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--purple);
+    margin-bottom: 1rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+}
+
+/* Horizontal rules */
+hr {
+    border: none;
+    border-top: 1px solid var(--fg-muted);
+    margin: 2rem 0;
+    opacity: 0.3;
+}
+
+/* Paragraphs */
+p {
+    margin-bottom: 1rem;
+}
+
+p:last-child {
+    margin-bottom: 0;
+}
+
+em {
+    color: var(--accent);
+    font-style: normal;
+}
+
+strong {
+    color: var(--green);
+    font-weight: 600;
+    letter-spacing: 0.02em;
+}
+
+/* Intro section */
+#intro p {
+    color: var(--fg-dim);
+}
+
+/* Now section */
+.updated {
+    font-size: 0.75rem;
+    color: var(--fg-muted);
+    margin-bottom: 1rem;
+}
+
+#now ul li {
+    border-left: 2px solid var(--accent-dim);
+    padding-left: 1rem;
+    margin-left: 0;
+    margin-bottom: 1rem;
+    transition: border-color 0.2s ease;
+}
+
+#now ul li::before {
+    display: none;
+}
+
+#now ul li:hover {
+    border-left-color: var(--accent);
+}
+
+/* Lists */
+ul {
+    list-style: none;
+}
+
+ul li {
+    position: relative;
+    padding-left: 1.25rem;
+    margin-bottom: 0.75rem;
+}
+
+ul li::before {
+    content: '>';
+    position: absolute;
+    left: 0;
+    color: var(--fg-muted);
+}
+
+/* Posts list */
+.posts li {
+    display: flex;
+    gap: 1rem;
+    align-items: baseline;
+}
+
+.posts .date {
+    font-size: 0.75rem;
+    color: var(--fg-muted);
+    flex-shrink: 0;
+}
+
+.posts a {
+    color: var(--fg);
+    font-weight: 500;
+}
+
+/* Projects list */
+.projects .desc {
+    color: var(--fg-dim);
+    font-size: 0.8125rem;
+}
+
+.projects .wip {
+    color: var(--orange);
+}
+
+/* Links section */
+.links {
+    display: flex;
+    gap: 2rem;
+    flex-wrap: wrap;
+}
+
+.links li {
+    padding-left: 0;
+}
+
+.links li::before {
+    display: none;
+}
+
+/* Links */
+a {
+    color: var(--accent);
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+a:hover {
+    color: var(--fg);
+    text-decoration: underline;
+    text-decoration-style: dotted;
+    text-underline-offset: 3px;
+}
+
+/* Footer */
+footer {
+    margin-top: 4rem;
+    text-align: center;
+}
+
+.colophon {
+    font-size: 0.75rem;
+    color: var(--fg-muted);
+}
+
+.symbol {
+    opacity: 0.5;
+}
+
+/* Corner glyphs - esoteric touches */
+.glyph {
+    position: fixed;
+    font-size: 1rem;
+    color: var(--fg-muted);
+    opacity: 0.15;
+    pointer-events: none;
+    user-select: none;
+}
+
+.top-left { top: 1rem; left: 1rem; }
+.top-right { top: 1rem; right: 1rem; }
+.bottom-left { bottom: 1rem; left: 1rem; }
+.bottom-right { bottom: 1rem; right: 1rem; }
+
+/* Responsive */
+@media (max-width: 480px) {
+    main {
+        padding: 2rem 1rem;
+    }
+
+    .sigil {
+        font-size: 0.5rem;
+    }
+
+    h1 {
+        font-size: 1.125rem;
+    }
+
+    nav .sep {
+        margin: 0 0.5rem;
+    }
+
+    .posts li {
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .links {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+}
+
+/* Subtle scanline effect (optional, adds to terminal feel) */
+body::after {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(0, 0, 0, 0.03) 2px,
+        rgba(0, 0, 0, 0.03) 4px
+    );
+    z-index: 9999;
+}
+
+/* Cursor blink animation for potential terminal effect */
+@keyframes blink {
+    0%, 50% { opacity: 1; }
+    51%, 100% { opacity: 0; }
+}
+
+.cursor::after {
+    content: '_';
+    animation: blink 1s infinite;
+}
+
+/* =============================================================================
+   Animations - subtle, terminal-inspired
+   ============================================================================= */
+
+/* Fade in on page load */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeInSlow {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* Staggered entrance for main content */
+main > header { animation: fadeIn 0.4s ease-out both; }
+main > nav { animation: fadeIn 0.4s ease-out 0.1s both; }
+main > section:nth-of-type(1) { animation: fadeIn 0.4s ease-out 0.15s both; }
+main > section:nth-of-type(2) { animation: fadeIn 0.4s ease-out 0.2s both; }
+main > section:nth-of-type(3) { animation: fadeIn 0.4s ease-out 0.25s both; }
+main > section:nth-of-type(4) { animation: fadeIn 0.4s ease-out 0.3s both; }
+main > section:nth-of-type(5) { animation: fadeIn 0.4s ease-out 0.35s both; }
+main > footer { animation: fadeIn 0.4s ease-out 0.4s both; }
+
+/* Glyphs fade in slower */
+.glyph { animation: fadeInSlow 1.5s ease-out 0.5s both; }
+
+/* Link hover effects */
+a {
+    position: relative;
+    transition: color 0.2s ease;
+}
+
+nav a::after,
+.posts a::after,
+.projects a::after,
+.links a::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 0;
+    height: 1px;
+    background: var(--accent);
+    transition: width 0.25s ease;
+}
+
+nav a:hover::after,
+.posts a:hover::after,
+.projects a:hover::after,
+.links a:hover::after {
+    width: 100%;
+}
+
+/* Subtle glow on link hover */
+nav a:hover,
+.posts a:hover {
+    text-shadow: 0 0 8px var(--accent-dim);
+}
+
+/* List item hover effects */
+ul li {
+    transition: transform 0.15s ease, opacity 0.15s ease;
+}
+
+.posts li:hover,
+.projects li:hover {
+    transform: translateX(4px);
+}
+
+.posts li::before,
+.projects li::before {
+    transition: color 0.2s ease;
+}
+
+.posts li:hover::before,
+.projects li:hover::before {
+    color: var(--accent);
+}
+
+/* Sigil subtle pulse */
+@keyframes sigilPulse {
+    0%, 100% { opacity: 0.6; }
+    50% { opacity: 0.4; }
+}
+
+.sigil {
+    animation: sigilPulse 4s ease-in-out infinite;
+}
+
+/* HR subtle fade-in */
+hr {
+    animation: fadeInSlow 0.6s ease-out both;
+}
+
+/* =============================================================================
+   Project cards with images
+   ============================================================================= */
+
+.project-card {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+    padding: 0.75rem 0;
+    transition: background 0.2s ease;
+}
+
+.project-card:hover {
+    background: var(--bg-alt);
+    margin-left: -0.5rem;
+    padding-left: 0.5rem;
+    margin-right: -0.5rem;
+    padding-right: 0.5rem;
+    border-radius: 4px;
+}
+
+.project-thumb {
+    width: 48px;
+    height: 48px;
+    flex-shrink: 0;
+    border-radius: 4px;
+    overflow: hidden;
+    background: var(--bg-alt);
+    border: 1px solid var(--fg-muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: border-color 0.2s ease, transform 0.2s ease;
+}
+
+.project-card:hover .project-thumb {
+    border-color: var(--accent-dim);
+    transform: scale(1.05);
+}
+
+.project-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.project-thumb .placeholder {
+    font-size: 1.25rem;
+    color: var(--fg-muted);
+}
+
+.project-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.project-info a,
+.project-info .wip {
+    display: block;
+    margin-bottom: 0.25rem;
+    font-weight: 600;
+    font-size: 0.9375rem;
+    color: var(--fg);
+    letter-spacing: 0.02em;
+}
+
+.project-info a:hover {
+    color: var(--accent);
+    text-shadow: 0 0 8px var(--accent-dim);
+}
+
+.project-info .wip {
+    color: var(--orange);
+}
+
+/* =============================================================================
+   Images in articles
+   ============================================================================= */
+
+article .content img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 4px;
+    border: 1px solid var(--fg-muted);
+    margin: 1.5rem 0;
+    display: block;
+}
+
+article .content figure {
+    margin: 1.5rem 0;
+}
+
+article .content figcaption {
+    font-size: 0.75rem;
+    color: var(--fg-muted);
+    text-align: center;
+    margin-top: 0.5rem;
+    font-style: italic;
+}
+
+/* Image hover effect */
+article .content img {
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+article .content img:hover {
+    border-color: var(--accent-dim);
+    box-shadow: 0 0 12px rgba(122, 162, 247, 0.15);
+}
+
+/* Reduce motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* =============================================================================
+   Article/Post pages
+   ============================================================================= */
+
+/* Breadcrumb navigation */
+.breadcrumb {
+    text-align: left;
+    margin-bottom: 3rem;
+}
+
+.breadcrumb .current {
+    color: var(--fg-dim);
+}
+
+/* Post header */
+.post-header {
+    text-align: left;
+    margin-bottom: 2.5rem;
+}
+
+.post-header h1 {
+    font-size: 1.5rem;
+    letter-spacing: 0.02em;
+    margin-bottom: 0.5rem;
+}
+
+.meta {
+    font-size: 0.75rem;
+    color: var(--fg-muted);
+}
+
+/* Article content */
+article .content h2 {
+    font-size: 1rem;
+    color: var(--green);
+    margin-top: 2.5rem;
+    margin-bottom: 1rem;
+}
+
+article .content p {
+    color: var(--fg-dim);
+}
+
+article .content ul {
+    margin: 1rem 0;
+}
+
+/* Footnote */
+.footnote {
+    font-size: 0.8125rem;
+    color: var(--fg-muted);
+    font-style: italic;
+}
+
+/* Nav footer */
+.nav-footer {
+    text-align: left;
+}
+
+.nav-footer a {
+    color: var(--fg-muted);
+    font-size: 0.8125rem;
+}
+
+.nav-footer a:hover {
+    color: var(--accent);
+}

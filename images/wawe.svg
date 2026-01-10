@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 96 96">
+  <style>
+    @keyframes nodePulse {
+      0%, 100% { opacity: 0.7; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.15); }
+    }
+    @keyframes connectionPulse {
+      0%, 100% { stroke-opacity: 0.3; }
+      50% { stroke-opacity: 0.8; }
+    }
+    @keyframes centerGlow {
+      0%, 100% { r: 2; opacity: 0.8; }
+      50% { r: 3.5; opacity: 1; }
+    }
+    @keyframes dataFlow {
+      0% { stroke-dashoffset: 8; }
+      100% { stroke-dashoffset: 0; }
+    }
+    .node1 { animation: nodePulse 2s ease-in-out infinite; transform-origin: 48px 30px; }
+    .node2 { animation: nodePulse 2s ease-in-out 0.5s infinite; transform-origin: 28px 55px; }
+    .node3 { animation: nodePulse 2s ease-in-out 1s infinite; transform-origin: 68px 55px; }
+    .node4 { animation: nodePulse 2s ease-in-out 1.5s infinite; transform-origin: 48px 72px; }
+    .connection { animation: connectionPulse 3s ease-in-out infinite; }
+    .center { animation: centerGlow 1.5s ease-in-out infinite; }
+    .dataline { animation: dataFlow 1s linear infinite; }
+  </style>
+  <rect width="96" height="96" fill="#0a0a0a"/>
+  <!-- Connections with pulse -->
+  <line class="connection" x1="48" y1="36" x2="28" y2="49" stroke="#555" stroke-width="1"/>
+  <line class="connection" x1="48" y1="36" x2="68" y2="49" stroke="#555" stroke-width="1"/>
+  <line class="connection" x1="28" y1="61" x2="48" y2="66" stroke="#555" stroke-width="1"/>
+  <line class="connection" x1="68" y1="61" x2="48" y2="66" stroke="#555" stroke-width="1"/>
+  <line class="dataline" x1="28" y1="55" x2="68" y2="55" stroke="#7aa2f7" stroke-width="1" stroke-dasharray="4,4"/>
+  <!-- Brain/network nodes representing multi-agent system -->
+  <circle class="node1" cx="48" cy="30" r="6" fill="none" stroke="#7aa2f7" stroke-width="1.5"/>
+  <circle class="node2" cx="28" cy="55" r="6" fill="none" stroke="#9ece6a" stroke-width="1.5"/>
+  <circle class="node3" cx="68" cy="55" r="6" fill="none" stroke="#bb9af7" stroke-width="1.5"/>
+  <circle class="node4" cx="48" cy="72" r="6" fill="none" stroke="#e0af68" stroke-width="1.5"/>
+  <!-- Inner dots for active state -->
+  <circle cx="48" cy="30" r="2" fill="#7aa2f7" opacity="0.5"/>
+  <circle cx="28" cy="55" r="2" fill="#9ece6a" opacity="0.5"/>
+  <circle cx="68" cy="55" r="2" fill="#bb9af7" opacity="0.5"/>
+  <circle cx="48" cy="72" r="2" fill="#e0af68" opacity="0.5"/>
+  <!-- Central dot with glow -->
+  <circle class="center" cx="48" cy="50" r="2" fill="#7aa2f7"/>
+</svg>

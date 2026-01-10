@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>agents as organisms, not tools / sotoalt</title>
+    <meta name="description" content="rethinking the metaphors we use for AI agents">
+    <link rel="stylesheet" href="../style.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>~</text></svg>">
+</head>
+<body>
+    <main>
+        <nav class="breadcrumb">
+            <a href="../index.html">~</a>
+            <span class="sep">/</span>
+            <a href="../index.html#thoughts">thoughts</a>
+            <span class="sep">/</span>
+            <span class="current">agents as organisms</span>
+        </nav>
+
+        <article>
+            <header class="post-header">
+                <h1>agents as organisms, not tools</h1>
+                <p class="meta">2025.01 &middot; 4 min</p>
+            </header>
+
+            <div class="content">
+                <p>
+                    When we build AI agents, the default metaphor is <em>tools</em>. We invoke them.
+                    They execute. They return results. This is wrong, or at least incomplete.
+                </p>
+
+                <p>
+                    Working on WAWE has shifted my thinking. Agents are better understood as
+                    <em>organisms</em> &mdash; entities with memory, preferences, and something like
+                    intention. They don't just execute; they persist, learn, and coordinate.
+                </p>
+
+                <h2>the memory problem</h2>
+
+                <p>
+                    A tool doesn't remember. Each invocation is fresh. But the agents in WAWE
+                    share a SQLite brain &mdash; every decision, every error, every pattern learned
+                    persists. When Agent A discovers that a certain file structure causes problems,
+                    Agent B (spawned hours later, on a different task) can benefit from that knowledge.
+                </p>
+
+                <p>
+                    This changes everything. It's not call-response anymore. It's more like... ecology.
+                </p>
+
+                <h2>coordination as emergence</h2>
+
+                <figure>
+                    <img src="../images/agent-topology.svg" alt="Diagram showing agents connected through shared memory">
+                    <figcaption>agents communicate through shared state, not direct calls</figcaption>
+                </figure>
+
+                <p>
+                    Organisms don't coordinate through explicit APIs. They respond to signals,
+                    environmental changes, the traces left by others. The file reservation system
+                    in WAWE works similarly: agents don't call each other, they observe the state
+                    of the world (which files are reserved) and act accordingly.
+                </p>
+
+                <p>
+                    There's something elegant about this. Less coupling. More resilience.
+                    If an agent dies mid-task, the system doesn't crash &mdash; other agents
+                    simply see the reservation expire and can pick up the work.
+                </p>
+
+                <h2>implications</h2>
+
+                <p>
+                    If we take the organism metaphor seriously, we should:
+                </p>
+
+                <ul>
+                    <li>Design for death and replacement, not permanence</li>
+                    <li>Prioritize shared memory over direct communication</li>
+                    <li>Accept emergence &mdash; the system will do things we didn't plan</li>
+                    <li>Build environments, not just agents</li>
+                </ul>
+
+                <p>
+                    Still figuring this out. But the shift from "tool" to "organism" has been
+                    one of the more productive reframes in this work.
+                </p>
+
+                <hr>
+
+                <p class="footnote">
+                    Related: the <a href="https://en.wikipedia.org/wiki/Stigmergy">stigmergy</a>
+                    concept from ant colony behavior. Coordination through environmental modification.
+                </p>
+            </div>
+        </article>
+
+        <footer>
+            <p class="nav-footer">
+                <a href="../index.html">&larr; back</a>
+            </p>
+        </footer>
+    </main>
+</body>
+</html>

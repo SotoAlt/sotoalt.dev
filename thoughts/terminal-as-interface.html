@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>the terminal as interface philosophy / sotoalt</title>
+    <meta name="description" content="why the command line persists, and what it means for design">
+    <link rel="stylesheet" href="../style.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>~</text></svg>">
+</head>
+<body>
+    <main>
+        <nav class="breadcrumb">
+            <a href="../index.html">~</a>
+            <span class="sep">/</span>
+            <a href="../index.html#thoughts">thoughts</a>
+            <span class="sep">/</span>
+            <span class="current">terminal as interface</span>
+        </nav>
+
+        <article>
+            <header class="post-header">
+                <h1>the terminal as interface philosophy</h1>
+                <p class="meta">2024.12 &middot; 5 min</p>
+            </header>
+
+            <div class="content">
+                <p>
+                    The terminal persists. Despite decades of GUI innovation, the command line
+                    remains essential for developers, sysadmins, and power users. Why?
+                </p>
+
+                <p>
+                    It's not nostalgia or stubbornness. The terminal embodies a different
+                    <em>philosophy</em> of interaction &mdash; one worth understanding even if
+                    you prefer graphical interfaces.
+                </p>
+
+                <h2>composition over comprehensiveness</h2>
+
+                <p>
+                    GUIs try to anticipate every action you might want. They surface features
+                    through menus, buttons, and dialogs. This works until it doesn't &mdash;
+                    until you need to do something the designer didn't anticipate.
+                </p>
+
+                <p>
+                    The terminal offers primitives instead. Small tools that do one thing well,
+                    combined through pipes and scripts. You compose your solution from parts.
+                </p>
+
+                <h2>text as universal interface</h2>
+
+                <p>
+                    Everything in a terminal is text. Commands, output, files, configuration.
+                    This uniformity means any tool can work with any other. <code>grep</code>
+                    doesn't care what generated the text it searches.
+                </p>
+
+                <p>
+                    This is profound. In GUI-land, each app is a silo. In terminal-land,
+                    everything flows together.
+                </p>
+
+                <h2>documentation as interface</h2>
+
+                <p>
+                    Commands are words. You can read them, describe them, share them.
+                    "Run <code>ls -la</code>" is unambiguous. "Click the folder icon, then..."
+                    is not.
+                </p>
+
+                <p>
+                    This makes terminals inherently more <em>shareable</em>. Knowledge transfers
+                    as text, not screenshots.
+                </p>
+
+                <h2>what this means for design</h2>
+
+                <p>
+                    The terminal philosophy suggests some principles:
+                </p>
+
+                <ul>
+                    <li>Design small, composable things over monolithic solutions</li>
+                    <li>Use text/structured data as interchange format</li>
+                    <li>Enable automation by default, not as afterthought</li>
+                    <li>Make actions describable, not just clickable</li>
+                </ul>
+
+                <p>
+                    You don't have to use a terminal to benefit from its wisdom.
+                </p>
+            </div>
+        </article>
+
+        <footer>
+            <p class="nav-footer">
+                <a href="../index.html">&larr; back</a>
+            </p>
+        </footer>
+    </main>
+</body>
+</html>

@@ -1,0 +1,89 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 96 96">
+  <style>
+    @keyframes eyeBlink {
+      0%, 90%, 100% { height: 6px; y: 34px; }
+      95% { height: 1px; y: 37px; }
+    }
+    @keyframes eyeGlow {
+      0%, 100% { fill-opacity: 0.8; }
+      50% { fill-opacity: 1; filter: drop-shadow(0 0 2px #7aa2f7); }
+    }
+    @keyframes antennaSignal {
+      0%, 100% { r: 2; fill-opacity: 0.5; }
+      50% { r: 3; fill-opacity: 1; }
+    }
+    @keyframes armSwing {
+      0%, 100% { transform: rotate(0deg); }
+      25% { transform: rotate(-8deg); }
+      75% { transform: rotate(8deg); }
+    }
+    @keyframes coinSpin {
+      0% { transform: scaleX(1); }
+      25% { transform: scaleX(0.3); }
+      50% { transform: scaleX(1); }
+      75% { transform: scaleX(0.3); }
+      100% { transform: scaleX(1); }
+    }
+    @keyframes coinGlow {
+      0%, 100% { stroke-opacity: 0.6; }
+      50% { stroke-opacity: 1; stroke: #f0c078; }
+    }
+    @keyframes treadMove {
+      0% { stroke-dashoffset: 0; }
+      100% { stroke-dashoffset: 8; }
+    }
+    .eye { animation: eyeGlow 2s ease-in-out infinite; }
+    .eye-left { animation: eyeGlow 2s ease-in-out infinite; }
+    .eye-right { animation: eyeGlow 2s ease-in-out 0.1s infinite; }
+    .antenna { animation: antennaSignal 1s ease-in-out infinite; }
+    .arm-left { animation: armSwing 2s ease-in-out infinite; transform-origin: 32px 40px; }
+    .arm-right { animation: armSwing 2s ease-in-out 1s infinite; transform-origin: 64px 40px; }
+    .coin { animation: coinSpin 3s ease-in-out infinite, coinGlow 2s ease-in-out infinite; transform-origin: 72px 72px; }
+    .tread { animation: treadMove 0.5s linear infinite; }
+  </style>
+  <rect width="96" height="96" fill="#0a0a0a"/>
+  <!-- Antenna -->
+  <line x1="48" y1="28" x2="48" y2="16" stroke="#555" stroke-width="1.5"/>
+  <circle class="antenna" cx="48" cy="14" r="2" fill="#9ece6a"/>
+  <!-- Signal waves from antenna -->
+  <circle cx="48" cy="14" r="6" fill="none" stroke="#9ece6a" stroke-width="0.5" opacity="0.3"/>
+  <circle cx="48" cy="14" r="10" fill="none" stroke="#9ece6a" stroke-width="0.5" opacity="0.15"/>
+  <!-- Robot head/body -->
+  <rect x="32" y="28" width="32" height="28" rx="3" fill="none" stroke="#f7768e" stroke-width="1.5"/>
+  <!-- Face panel -->
+  <rect x="34" y="30" width="28" height="24" fill="#f7768e" opacity="0.05"/>
+  <!-- Eyes with blink -->
+  <rect class="eye-left" x="38" y="34" width="6" height="6" fill="#7aa2f7"/>
+  <rect class="eye-right" x="52" y="34" width="6" height="6" fill="#7aa2f7"/>
+  <!-- Eye highlights -->
+  <rect x="40" y="35" width="2" height="2" fill="#fff" opacity="0.4"/>
+  <rect x="54" y="35" width="2" height="2" fill="#fff" opacity="0.4"/>
+  <!-- Mouth/speaker grille -->
+  <line x1="40" y1="47" x2="56" y2="47" stroke="#555" stroke-width="1"/>
+  <line x1="40" y1="49" x2="56" y2="49" stroke="#555" stroke-width="1"/>
+  <line x1="40" y1="51" x2="56" y2="51" stroke="#555" stroke-width="1"/>
+  <!-- Arms/weapons -->
+  <g class="arm-left">
+    <line x1="32" y1="40" x2="20" y2="34" stroke="#f7768e" stroke-width="1.5"/>
+    <circle cx="18" cy="33" r="2" fill="#f7768e" opacity="0.7"/>
+  </g>
+  <g class="arm-right">
+    <line x1="64" y1="40" x2="76" y2="34" stroke="#f7768e" stroke-width="1.5"/>
+    <circle cx="78" cy="33" r="2" fill="#f7768e" opacity="0.7"/>
+  </g>
+  <!-- Legs/treads with movement -->
+  <rect x="34" y="58" width="10" height="14" fill="none" stroke="#555" stroke-width="1"/>
+  <rect x="52" y="58" width="10" height="14" fill="none" stroke="#555" stroke-width="1"/>
+  <!-- Tread lines -->
+  <line class="tread" x1="35" y1="62" x2="43" y2="62" stroke="#555" stroke-width="0.5" stroke-dasharray="2,2"/>
+  <line class="tread" x1="35" y1="66" x2="43" y2="66" stroke="#555" stroke-width="0.5" stroke-dasharray="2,2"/>
+  <line class="tread" x1="35" y1="70" x2="43" y2="70" stroke="#555" stroke-width="0.5" stroke-dasharray="2,2"/>
+  <line class="tread" x1="53" y1="62" x2="61" y2="62" stroke="#555" stroke-width="0.5" stroke-dasharray="2,2"/>
+  <line class="tread" x1="53" y1="66" x2="61" y2="66" stroke="#555" stroke-width="0.5" stroke-dasharray="2,2"/>
+  <line class="tread" x1="53" y1="70" x2="61" y2="70" stroke="#555" stroke-width="0.5" stroke-dasharray="2,2"/>
+  <!-- Crypto coin indicator with spin -->
+  <g class="coin">
+    <circle cx="72" cy="72" r="8" fill="none" stroke="#e0af68" stroke-width="1.5"/>
+    <text x="72" y="76" font-family="monospace" font-size="9" fill="#e0af68" text-anchor="middle" font-weight="bold">$</text>
+  </g>
+</svg>

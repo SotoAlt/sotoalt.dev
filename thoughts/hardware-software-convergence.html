@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>where hardware meets software / sotoalt</title>
+    <meta name="description" content="lessons from building physical devices with software brains">
+    <link rel="stylesheet" href="../style.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>~</text></svg>">
+</head>
+<body>
+    <main>
+        <nav class="breadcrumb">
+            <a href="../index.html">~</a>
+            <span class="sep">/</span>
+            <a href="../index.html#thoughts">thoughts</a>
+            <span class="sep">/</span>
+            <span class="current">hardware meets software</span>
+        </nav>
+
+        <article>
+            <header class="post-header">
+                <h1>where hardware meets software</h1>
+                <p class="meta">2024.12 &middot; 6 min</p>
+            </header>
+
+            <div class="content">
+                <p>
+                    Building Amiwo &mdash; a personal UV and air quality sensor &mdash; has been
+                    a lesson in the strange space where atoms meet bits.
+                </p>
+
+                <p>
+                    Software people often underestimate hardware. Hardware people often
+                    underestimate software. Both are wrong. The convergence zone is where
+                    interesting things happen.
+                </p>
+
+                <h2>atoms are slow, bits are fast</h2>
+
+                <p>
+                    In software, iteration is free. Deploy, measure, fix, deploy again.
+                    The cycle can be hours or minutes.
+                </p>
+
+                <p>
+                    In hardware, iteration costs. Each PCB revision takes weeks. Each
+                    enclosure redesign needs new molds. You learn to think more carefully
+                    before committing.
+                </p>
+
+                <p>
+                    This constraint is frustrating but valuable. It forces <em>design</em> &mdash;
+                    actual upfront thinking about what you're building and why.
+                </p>
+
+                <h2>the BLE dance</h2>
+
+                <p>
+                    Bluetooth Low Energy is the bridge between Amiwo's hardware and the phone app.
+                    It's a protocol designed by committee, full of edge cases and gotchas.
+                </p>
+
+                <p>
+                    Getting reliable connections across different phones, OS versions, and
+                    environmental conditions is harder than any backend I've built. The
+                    wireless medium is hostile. Packets disappear. Connections drop. You
+                    build resilience or fail.
+                </p>
+
+                <h2>making invisible forces visible</h2>
+
+                <p>
+                    The philosophical goal of Amiwo is <em>visibility</em>. UV radiation is
+                    invisible. Air quality is invisible. But they affect us constantly.
+                </p>
+
+                <p>
+                    The device takes these hidden forces and makes them legible. A number.
+                    A color. A notification. Suddenly you can respond to what you couldn't
+                    perceive.
+                </p>
+
+                <p>
+                    There's something almost esoteric about this. Making the invisible visible.
+                    Isn't that what all measurement does? What science does?
+                </p>
+
+                <h2>lessons so far</h2>
+
+                <ul>
+                    <li>Start with the sensor, not the form factor</li>
+                    <li>BLE reliability > BLE features</li>
+                    <li>Test with real users in real conditions early</li>
+                    <li>The enclosure matters more than you think</li>
+                    <li>Power budget is the hidden constraint</li>
+                </ul>
+
+                <p>
+                    Still building. Still learning.
+                </p>
+            </div>
+        </article>
+
+        <footer>
+            <p class="nav-footer">
+                <a href="../index.html">&larr; back</a>
+            </p>
+        </footer>
+    </main>
+</body>
+</html>

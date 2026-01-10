@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="200" viewBox="0 0 400 200">
+  <rect width="400" height="200" fill="#0f0f0f"/>
+  <!-- Terminal aesthetic diagram -->
+  <!-- Box 1: Input -->
+  <rect x="20" y="70" width="80" height="60" fill="none" stroke="#7aa2f7" stroke-width="1"/>
+  <text x="60" y="95" font-family="monospace" font-size="10" fill="#7aa2f7" text-anchor="middle">input</text>
+  <text x="60" y="110" font-family="monospace" font-size="8" fill="#555" text-anchor="middle">&gt; stdin</text>
+
+  <!-- Arrow 1 -->
+  <line x1="100" y1="100" x2="140" y2="100" stroke="#555" stroke-width="1"/>
+  <polygon points="140,100 135,96 135,104" fill="#555"/>
+
+  <!-- Box 2: Process -->
+  <rect x="150" y="70" width="100" height="60" fill="none" stroke="#9ece6a" stroke-width="1"/>
+  <text x="200" y="95" font-family="monospace" font-size="10" fill="#9ece6a" text-anchor="middle">process</text>
+  <text x="200" y="110" font-family="monospace" font-size="8" fill="#555" text-anchor="middle">| transform</text>
+
+  <!-- Arrow 2 -->
+  <line x1="250" y1="100" x2="290" y2="100" stroke="#555" stroke-width="1"/>
+  <polygon points="290,100 285,96 285,104" fill="#555"/>
+
+  <!-- Box 3: Output -->
+  <rect x="300" y="70" width="80" height="60" fill="none" stroke="#bb9af7" stroke-width="1"/>
+  <text x="340" y="95" font-family="monospace" font-size="10" fill="#bb9af7" text-anchor="middle">output</text>
+  <text x="340" y="110" font-family="monospace" font-size="8" fill="#555" text-anchor="middle">&gt; stdout</text>
+
+  <!-- Feedback loop -->
+  <path d="M340 130 L340 160 L60 160 L60 130" fill="none" stroke="#555" stroke-width="1" stroke-dasharray="4,2"/>
+  <polygon points="60,130 56,135 64,135" fill="#555"/>
+  <text x="200" y="175" font-family="monospace" font-size="8" fill="#555" text-anchor="middle">feedback loop</text>
+
+  <!-- Title -->
+  <text x="200" y="30" font-family="monospace" font-size="11" fill="#8a8a8a" text-anchor="middle">unix philosophy: everything is a stream</text>
+</svg>

@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>tokenization beyond finance / sotoalt</title>
+    <meta name="description" content="what happens when anything can be a token">
+    <link rel="stylesheet" href="../style.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>~</text></svg>">
+</head>
+<body>
+    <main>
+        <nav class="breadcrumb">
+            <a href="../index.html">~</a>
+            <span class="sep">/</span>
+            <a href="../index.html#thoughts">thoughts</a>
+            <span class="sep">/</span>
+            <span class="current">tokenization beyond finance</span>
+        </nav>
+
+        <article>
+            <header class="post-header">
+                <h1>tokenization beyond finance</h1>
+                <p class="meta">2024.10 &middot; 4 min</p>
+            </header>
+
+            <div class="content">
+                <p>
+                    The crypto world talks about tokenization primarily as a financial
+                    mechanism. Tokenize real estate. Tokenize stocks. Tokenize art.
+                    Turn illiquid assets into tradeable tokens.
+                </p>
+
+                <p>
+                    This is fine, but it's a limited view. Tokenization is more fundamentally
+                    about <em>creating handles for things</em>. And that's useful far beyond finance.
+                </p>
+
+                <h2>handles and references</h2>
+
+                <p>
+                    A token is just a reference &mdash; a unique identifier that points to something
+                    else. File descriptors are tokens. URLs are tokens. Pointers are tokens.
+                    The token itself is cheap and movable; the thing it references may be heavy
+                    and stationary.
+                </p>
+
+                <p>
+                    What blockchains add is: immutable, decentralized, globally-readable reference
+                    systems. Anyone can create a reference. Anyone can verify it. No central
+                    authority controls the namespace.
+                </p>
+
+                <h2>tellura and physical tokens</h2>
+
+                <p>
+                    This is why <em>Tellura</em> interests me. We're not just making copper tradeable
+                    (it already is, on commodity exchanges). We're creating a <strong>handle</strong>
+                    to physical copper that can exist in software systems.
+                </p>
+
+                <p>
+                    A copper warrant token can:
+                </p>
+
+                <ul>
+                    <li>Be used as collateral in DeFi protocols</li>
+                    <li>Be fractionalized (own 0.1% of a copper warrant)</li>
+                    <li>Trigger automated actions when conditions are met</li>
+                    <li>Be composed with other tokens in novel ways</li>
+                </ul>
+
+                <p>
+                    None of this requires the copper to move. The token is a handle; the handle
+                    enables composition.
+                </p>
+
+                <h2>beyond assets</h2>
+
+                <p>
+                    What else could benefit from decentralized, verifiable handles?
+                </p>
+
+                <ul>
+                    <li><strong>Identity claims</strong> &mdash; "I am over 18" without revealing who you are</li>
+                    <li><strong>Credentials</strong> &mdash; verifiable proof you completed something</li>
+                    <li><strong>Permissions</strong> &mdash; transferable access rights</li>
+                    <li><strong>Commitments</strong> &mdash; cryptographic promises that can be verified</li>
+                </ul>
+
+                <p>
+                    The pattern is: take something that currently requires trust or a central
+                    authority, create a token, and suddenly it can participate in trustless,
+                    composable systems.
+                </p>
+
+                <p>
+                    This is early. The tooling is rough. But the design space is vast.
+                </p>
+            </div>
+        </article>
+
+        <footer>
+            <p class="nav-footer">
+                <a href="../index.html">&larr; back</a>
+            </p>
+        </footer>
+    </main>
+</body>
+</html>
