@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>sotoalt</title>
+    <link>https://sotoalt.dev</link>
+    <description>thoughts, experiments, and rabbit holes</description>
+    <language>en-us</language>
+    <lastBuildDate>Fri, 09 Jan 2026 21:56:09 +0000</lastBuildDate>
+    <atom:link href="https://sotoalt.dev/feed.xml" rel="self" type="application/rss+xml"/>
+    <item>
+      <title>agents as organisms</title>
+      <link>https://sotoalt.dev/thoughts/agents-as-organisms.html</link>
+      <guid>https://sotoalt.dev/thoughts/agents-as-organisms.html</guid>
+      <pubDate>Thu, 01 Jan 2026 00:00:00 +0000</pubDate>
+      <description></description>
+    </item>
+    <item>
+      <title>invisible infrastructure</title>
+      <link>https://sotoalt.dev/thoughts/invisible-infrastructure.html</link>
+      <guid>https://sotoalt.dev/thoughts/invisible-infrastructure.html</guid>
+      <pubDate>Thu, 01 Jan 2026 00:00:00 +0000</pubDate>
+      <description></description>
+    </item>
+    <item>
+      <title>hardware software convergence</title>
+      <link>https://sotoalt.dev/thoughts/hardware-software-convergence.html</link>
+      <guid>https://sotoalt.dev/thoughts/hardware-software-convergence.html</guid>
+      <pubDate>Thu, 01 Jan 2026 00:00:00 +0000</pubDate>
+      <description></description>
+    </item>
+    <item>
+      <title>tokenization beyond finance</title>
+      <link>https://sotoalt.dev/thoughts/tokenization-beyond-finance.html</link>
+      <guid>https://sotoalt.dev/thoughts/tokenization-beyond-finance.html</guid>
+      <pubDate>Thu, 01 Jan 2026 00:00:00 +0000</pubDate>
+      <description></description>
+    </item>
+    <item>
+      <title>terminal as interface</title>
+      <link>https://sotoalt.dev/thoughts/terminal-as-interface.html</link>
+      <guid>https://sotoalt.dev/thoughts/terminal-as-interface.html</guid>
+      <pubDate>Thu, 01 Jan 2026 00:00:00 +0000</pubDate>
+      <description></description>
+    </item>
+    <item>
+      <title>coordination without control</title>
+      <link>https://sotoalt.dev/thoughts/coordination-without-control.html</link>
+      <guid>https://sotoalt.dev/thoughts/coordination-without-control.html</guid>
+      <pubDate>Thu, 01 Jan 2026 00:00:00 +0000</pubDate>
+      <description></description>
+    </item>
+  </channel>
+</rss>

@@ -4,8 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>coordination without control / sotoalt</title>
-    <meta name="description" content="how systems organize without central authority">
+    <meta name="description" content="">
     <link rel="stylesheet" href="../style.css">
+    <link rel="alternate" type="application/rss+xml" title="sotoalt RSS" href="../feed.xml">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>~</text></svg>">
 </head>
 <body>
@@ -15,94 +16,56 @@
             <span class="sep">/</span>
             <a href="../index.html#thoughts">thoughts</a>
             <span class="sep">/</span>
-            <span class="current">coordination without control</span>
+            <span class="current">coordination-without-control</span>
         </nav>
 
         <article>
             <header class="post-header">
                 <h1>coordination without control</h1>
-                <p class="meta">2024.11 &middot; 5 min</p>
+                <p class="meta">2026.01 &middot; 2 min</p>
             </header>
 
             <div class="content">
-                <p>
-                    Most systems assume coordination requires control. A central server. A master
-                    process. A coordinator node. But some of the most robust systems coordinate
-                    without any central authority.
-                </p>
-
-                <p>
-                    Git is peer-to-peer. Bitcoin has no master node. Ant colonies have no CEO.
-                    These systems achieve coordination through <em>protocol</em>, not hierarchy.
-                </p>
-
-                <figure>
-                    <img src="../images/agent-topology.svg" alt="Multi-agent topology diagram">
-                    <figcaption>agents communicate through shared state, not direct calls</figcaption>
-                </figure>
-
-                <h2>stigmergy revisited</h2>
-
-                <p>
-                    Ants coordinate by modifying their environment. One ant leaves a pheromone
-                    trail; another follows it; the trail gets stronger. No ant tells another
-                    what to do. The environment <strong>is</strong> the communication channel.
-                </p>
-
-                <p>
-                    In software terms: the database is the message bus. You don't call other
-                    services &mdash; you write to shared state and let others react.
-                </p>
-
-                <h2>WAWE and environmental coordination</h2>
-
-                <p>
-                    This is the model behind WAWE's agent coordination. Agents don't call each
-                    other. They read from and write to a shared SQLite database. File reservations,
-                    task queues, learnings &mdash; all stored in the environment.
-                </p>
-
-                <p>
-                    When Agent A reserves a file, Agent B simply <em>sees</em> the reservation
-                    (by querying the database) and acts accordingly. No direct communication
-                    needed. If Agent A crashes, the reservation eventually expires. The system
-                    heals itself.
-                </p>
-
-                <h2>the tradeoffs</h2>
-
-                <p>
-                    This approach isn't always better. You lose:
-                </p>
-
-                <ul>
-                    <li>Immediate feedback (you poll instead of push)</li>
-                    <li>Strong consistency (eventual consistency is the norm)</li>
-                    <li>Debugging clarity (no call stack, just state changes)</li>
-                </ul>
-
-                <p>
-                    But you gain:
-                </p>
-
-                <ul>
-                    <li>Resilience (no single point of failure)</li>
-                    <li>Flexibility (add new agents without changing existing ones)</li>
-                    <li>Simplicity (each agent is independent)</li>
-                </ul>
-
-                <p>
-                    Not every system should work this way. But when building systems that need
-                    to be robust and evolvable, it's worth considering: can we coordinate through
-                    environment rather than control?
-                </p>
-
-                <hr>
-
-                <p class="footnote">
-                    Further reading: <a href="https://en.wikipedia.org/wiki/Stigmergy">Stigmergy</a>
-                    on Wikipedia. Pierre-Paul Grassé coined the term in 1959 studying termites.
-                </p>
+<p>&lt;!DOCTYPE html&gt; &lt;html lang=&quot;en&quot;&gt; &lt;head&gt;     &lt;meta charset=&quot;UTF-8&quot;&gt;     &lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1.0&quot;&gt;     &lt;title&gt;coordination without control / sotoalt&lt;/title&gt;     &lt;meta name=&quot;description&quot; content=&quot;how systems organize without central authority&quot;&gt;     &lt;link rel=&quot;stylesheet&quot; href=&quot;../style.css&quot;&gt;     &lt;link rel=&quot;icon&quot; href=&quot;data:image/svg+xml,&lt;svg xmlns=&#x27;http://www.w3.org/2000/svg&#x27; viewBox=&#x27;0 0 100 100&#x27;&gt;&lt;text y=&#x27;.9em&#x27; font-size=&#x27;90&#x27;&gt;~&lt;/text&gt;&lt;/svg&gt;&quot;&gt; &lt;/head&gt; &lt;body&gt;     &lt;main&gt;         &lt;nav class=&quot;breadcrumb&quot;&gt;             &lt;a href=&quot;../index.html&quot;&gt;~&lt;/a&gt;             &lt;span class=&quot;sep&quot;&gt;/&lt;/span&gt;             &lt;a href=&quot;../index.html#thoughts&quot;&gt;thoughts&lt;/a&gt;             &lt;span class=&quot;sep&quot;&gt;/&lt;/span&gt;             &lt;span class=&quot;current&quot;&gt;coordination without control&lt;/span&gt;         &lt;/nav&gt;</p>
+                
+                <p>        &lt;article&gt;             &lt;header class=&quot;post-header&quot;&gt;                 &lt;h1&gt;coordination without control&lt;/h1&gt;                 &lt;p class=&quot;meta&quot;&gt;2024.11 &amp;middot; 5 min&lt;/p&gt;             &lt;/header&gt;</p>
+                
+                <p>            &lt;div class=&quot;content&quot;&gt;                 &lt;p&gt;                     Most systems assume coordination requires control. A central server. A master                     process. A coordinator node. But some of the most robust systems coordinate                     without any central authority.                 &lt;/p&gt;</p>
+                
+                <p>                &lt;p&gt;                     Git is peer-to-peer. Bitcoin has no master node. Ant colonies have no CEO.                     These systems achieve coordination through &lt;em&gt;protocol&lt;/em&gt;, not hierarchy.                 &lt;/p&gt;</p>
+                
+                <p>                &lt;figure&gt;                     &lt;img src=&quot;../images/agent-topology.svg&quot; alt=&quot;Multi-agent topology diagram&quot;&gt;                     &lt;figcaption&gt;agents communicate through shared state, not direct calls&lt;/figcaption&gt;                 &lt;/figure&gt;</p>
+                
+                <p>                &lt;h2&gt;stigmergy revisited&lt;/h2&gt;</p>
+                
+                <p>                &lt;p&gt;                     Ants coordinate by modifying their environment. One ant leaves a pheromone                     trail; another follows it; the trail gets stronger. No ant tells another                     what to do. The environment &lt;strong&gt;is&lt;/strong&gt; the communication channel.                 &lt;/p&gt;</p>
+                
+                <p>                &lt;p&gt;                     In software terms: the database is the message bus. You don&#x27;t call other                     services &amp;mdash; you write to shared state and let others react.                 &lt;/p&gt;</p>
+                
+                <p>                &lt;h2&gt;WAWE and environmental coordination&lt;/h2&gt;</p>
+                
+                <p>                &lt;p&gt;                     This is the model behind WAWE&#x27;s agent coordination. Agents don&#x27;t call each                     other. They read from and write to a shared SQLite database. File reservations,                     task queues, learnings &amp;mdash; all stored in the environment.                 &lt;/p&gt;</p>
+                
+                <p>                &lt;p&gt;                     When Agent A reserves a file, Agent B simply &lt;em&gt;sees&lt;/em&gt; the reservation                     (by querying the database) and acts accordingly. No direct communication                     needed. If Agent A crashes, the reservation eventually expires. The system                     heals itself.                 &lt;/p&gt;</p>
+                
+                <p>                &lt;h2&gt;the tradeoffs&lt;/h2&gt;</p>
+                
+                <p>                &lt;p&gt;                     This approach isn&#x27;t always better. You lose:                 &lt;/p&gt;</p>
+                
+                <p>                &lt;ul&gt;                     &lt;li&gt;Immediate feedback (you poll instead of push)&lt;/li&gt;                     &lt;li&gt;Strong consistency (eventual consistency is the norm)&lt;/li&gt;                     &lt;li&gt;Debugging clarity (no call stack, just state changes)&lt;/li&gt;                 &lt;/ul&gt;</p>
+                
+                <p>                &lt;p&gt;                     But you gain:                 &lt;/p&gt;</p>
+                
+                <p>                &lt;ul&gt;                     &lt;li&gt;Resilience (no single point of failure)&lt;/li&gt;                     &lt;li&gt;Flexibility (add new agents without changing existing ones)&lt;/li&gt;                     &lt;li&gt;Simplicity (each agent is independent)&lt;/li&gt;                 &lt;/ul&gt;</p>
+                
+                <p>                &lt;p&gt;                     Not every system should work this way. But when building systems that need                     to be robust and evolvable, it&#x27;s worth considering: can we coordinate through                     environment rather than control?                 &lt;/p&gt;</p>
+                
+                <p>                &lt;hr&gt;</p>
+                
+                <p>                &lt;p class=&quot;footnote&quot;&gt;                     Further reading: &lt;a href=&quot;https://en.wikipedia.org/wiki/Stigmergy&quot;&gt;Stigmergy&lt;/a&gt;                     on Wikipedia. Pierre-Paul Grassé coined the term in 1959 studying termites.                 &lt;/p&gt;             &lt;/div&gt;         &lt;/article&gt;</p>
+                
+                <p>        &lt;footer&gt;             &lt;p class=&quot;nav-footer&quot;&gt;                 &lt;a href=&quot;../index.html&quot;&gt;&amp;larr; back&lt;/a&gt;             &lt;/p&gt;         &lt;/footer&gt;     &lt;/main&gt; &lt;/body&gt; &lt;/html&gt;</p>
+                
             </div>
         </article>
 
