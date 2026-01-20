@@ -592,6 +592,20 @@ article .content img:hover {
     color: var(--fg-muted);
 }
 
+/* Article header image */
+article .content .header-image {
+    margin: 0 0 2rem 0;
+}
+
+article .content .header-image img {
+    width: 100%;
+    height: auto;
+    max-height: 400px;
+    object-fit: cover;
+    border-radius: 4px;
+    border: 1px solid var(--fg-muted);
+}
+
 /* Article content */
 article .content h2 {
     font-size: 1rem;
