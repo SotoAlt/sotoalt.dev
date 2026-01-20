@@ -61,11 +61,11 @@ header {
 }
 
 .sigil {
-    font-size: 0.6rem;
+    font-size: 2rem;
     line-height: 1.2;
-    color: var(--fg-muted);
-    margin-bottom: 1.5rem;
-    opacity: 0.6;
+    color: var(--fg-dim);
+    margin-bottom: 1rem;
+    opacity: 0.9;
 }
 
 h1 {
@@ -288,7 +288,7 @@ footer {
     }
 
     .sigil {
-        font-size: 0.5rem;
+        font-size: 1.5rem;
     }
 
     h1 {
