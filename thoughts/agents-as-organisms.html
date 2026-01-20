@@ -1,75 +1,139 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>agents as organisms / sotoalt</title>
-    <meta name="description" content="">
-    <link rel="stylesheet" href="../style.css">
-    <link rel="alternate" type="application/rss+xml" title="sotoalt RSS" href="../feed.xml">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>~</text></svg>">
-</head>
-<body>
-    <main>
-        <nav class="breadcrumb">
-            <a href="../index.html">~</a>
-            <span class="sep">/</span>
-            <a href="../index.html#thoughts">thoughts</a>
-            <span class="sep">/</span>
-            <span class="current">agents-as-organisms</span>
-        </nav>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>the altar, not the cloud / sotoalt</title>
+        <meta
+            name="description"
+            content="local intelligence as hedge against centralized thought"
+        />
+        <link rel="stylesheet" href="../style.css" />
+        <link
+            rel="icon"
+            href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>~</text></svg>"
+        />
+    </head>
+    <body>
+        <main>
+            <nav class="breadcrumb">
+                <a href="../index.html">~</a>
+                <span class="sep">/</span>
+                <a href="../index.html#thoughts">thoughts</a>
+                <span class="sep">/</span>
+                <span class="current">the altar, not the cloud</span>
+            </nav>
 
-        <article>
-            <header class="post-header">
-                <h1>agents as organisms</h1>
-                <p class="meta">2026.01 &middot; 2 min</p>
-            </header>
+            <article>
+                <header class="post-header">
+                    <h1>the altar, not the cloud</h1>
+                    <p class="meta">2026.01</p>
+                </header>
 
-            <div class="content">
-<p>&lt;!DOCTYPE html&gt; &lt;html lang=&quot;en&quot;&gt; &lt;head&gt;     &lt;meta charset=&quot;UTF-8&quot;&gt;     &lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1.0&quot;&gt;     &lt;title&gt;agents as organisms, not tools / sotoalt&lt;/title&gt;     &lt;meta name=&quot;description&quot; content=&quot;rethinking the metaphors we use for AI agents&quot;&gt;     &lt;link rel=&quot;stylesheet&quot; href=&quot;../style.css&quot;&gt;     &lt;link rel=&quot;icon&quot; href=&quot;data:image/svg+xml,&lt;svg xmlns=&#x27;http://www.w3.org/2000/svg&#x27; viewBox=&#x27;0 0 100 100&#x27;&gt;&lt;text y=&#x27;.9em&#x27; font-size=&#x27;90&#x27;&gt;~&lt;/text&gt;&lt;/svg&gt;&quot;&gt; &lt;/head&gt; &lt;body&gt;     &lt;main&gt;         &lt;nav class=&quot;breadcrumb&quot;&gt;             &lt;a href=&quot;../index.html&quot;&gt;~&lt;/a&gt;             &lt;span class=&quot;sep&quot;&gt;/&lt;/span&gt;             &lt;a href=&quot;../index.html#thoughts&quot;&gt;thoughts&lt;/a&gt;             &lt;span class=&quot;sep&quot;&gt;/&lt;/span&gt;             &lt;span class=&quot;current&quot;&gt;agents as organisms&lt;/span&gt;         &lt;/nav&gt;</p>
-                
-                <p>        &lt;article&gt;             &lt;header class=&quot;post-header&quot;&gt;                 &lt;h1&gt;agents as organisms, not tools&lt;/h1&gt;                 &lt;p class=&quot;meta&quot;&gt;2025.01 &amp;middot; 4 min&lt;/p&gt;             &lt;/header&gt;</p>
-                
-                <p>            &lt;div class=&quot;content&quot;&gt;                 &lt;p&gt;                     When we build AI agents, the default metaphor is &lt;em&gt;tools&lt;/em&gt;. We invoke them.                     They execute. They return results. This is wrong, or at least incomplete.                 &lt;/p&gt;</p>
-                
-                <p>                &lt;p&gt;                     Working on WAWE has shifted my thinking. Agents are better understood as                     &lt;em&gt;organisms&lt;/em&gt; &amp;mdash; entities with memory, preferences, and something like                     intention. They don&#x27;t just execute; they persist, learn, and coordinate.                 &lt;/p&gt;</p>
-                
-                <p>                &lt;h2&gt;the memory problem&lt;/h2&gt;</p>
-                
-                <p>                &lt;p&gt;                     A tool doesn&#x27;t remember. Each invocation is fresh. But the agents in WAWE                     share a SQLite brain &amp;mdash; every decision, every error, every pattern learned                     persists. When Agent A discovers that a certain file structure causes problems,                     Agent B (spawned hours later, on a different task) can benefit from that knowledge.                 &lt;/p&gt;</p>
-                
-                <p>                &lt;p&gt;                     This changes everything. It&#x27;s not call-response anymore. It&#x27;s more like... ecology.                 &lt;/p&gt;</p>
-                
-                <p>                &lt;h2&gt;coordination as emergence&lt;/h2&gt;</p>
-                
-                <p>                &lt;figure&gt;                     &lt;img src=&quot;../images/agent-topology.svg&quot; alt=&quot;Diagram showing agents connected through shared memory&quot;&gt;                     &lt;figcaption&gt;agents communicate through shared state, not direct calls&lt;/figcaption&gt;                 &lt;/figure&gt;</p>
-                
-                <p>                &lt;p&gt;                     Organisms don&#x27;t coordinate through explicit APIs. They respond to signals,                     environmental changes, the traces left by others. The file reservation system                     in WAWE works similarly: agents don&#x27;t call each other, they observe the state                     of the world (which files are reserved) and act accordingly.                 &lt;/p&gt;</p>
-                
-                <p>                &lt;p&gt;                     There&#x27;s something elegant about this. Less coupling. More resilience.                     If an agent dies mid-task, the system doesn&#x27;t crash &amp;mdash; other agents                     simply see the reservation expire and can pick up the work.                 &lt;/p&gt;</p>
-                
-                <p>                &lt;h2&gt;implications&lt;/h2&gt;</p>
-                
-                <p>                &lt;p&gt;                     If we take the organism metaphor seriously, we should:                 &lt;/p&gt;</p>
-                
-                <p>                &lt;ul&gt;                     &lt;li&gt;Design for death and replacement, not permanence&lt;/li&gt;                     &lt;li&gt;Prioritize shared memory over direct communication&lt;/li&gt;                     &lt;li&gt;Accept emergence &amp;mdash; the system will do things we didn&#x27;t plan&lt;/li&gt;                     &lt;li&gt;Build environments, not just agents&lt;/li&gt;                 &lt;/ul&gt;</p>
-                
-                <p>                &lt;p&gt;                     Still figuring this out. But the shift from &quot;tool&quot; to &quot;organism&quot; has been                     one of the more productive reframes in this work.                 &lt;/p&gt;</p>
-                
-                <p>                &lt;hr&gt;</p>
-                
-                <p>                &lt;p class=&quot;footnote&quot;&gt;                     Related: the &lt;a href=&quot;https://en.wikipedia.org/wiki/Stigmergy&quot;&gt;stigmergy&lt;/a&gt;                     concept from ant colony behavior. Coordination through environmental modification.                 &lt;/p&gt;             &lt;/div&gt;         &lt;/article&gt;</p>
-                
-                <p>        &lt;footer&gt;             &lt;p class=&quot;nav-footer&quot;&gt;                 &lt;a href=&quot;../index.html&quot;&gt;&amp;larr; back&lt;/a&gt;             &lt;/p&gt;         &lt;/footer&gt;     &lt;/main&gt; &lt;/body&gt; &lt;/html&gt;</p>
-                
-            </div>
-        </article>
+                <div class="content">
+                    <p>
+                        Everyone is racing toward centralized superintelligence. Bigger models, more compute, hyperscalers, everything in the cloud. Implicit assumption that intelligence wants to be general, universal, everywhere at once, bruteforced by pure capital. (Needless to say I believe any kind of superintelligence will be a mixture of different things we now call models.)
+                    </p>
 
-        <footer>
-            <p class="nav-footer">
-                <a href="../index.html">&larr; back</a>
-            </p>
-        </footer>
-    </main>
-</body>
+                    <p>
+                        But what if the interesting path is the opposite direction?
+                    </p>
+
+                    <!-- image: contrast diagram? centralized vs distributed -->
+
+                    <h2>the altar</h2>
+
+                    <p>
+                        There's an old pattern in human civilization &mdash; family altars, neighborhood shrines, local oracles. These were memory technologies of a sort, portals and centers of esoteric knowledge and connections. Focal points where knowledge accumulated through ritual and tending. The altar didn't know the dead &mdash; but it structured how the living remembered them and was the center around the rituals. The names were kept by the family, but the altar made the keeping possible and the lineage secure. They work like an anchor across time for a specific human community with shared experiences and knowledge unique to them.
+                    </p>
+
+                    <p>
+                        What would it mean to build AI like this?
+                    </p>
+
+                    <!-- image: altar concept sketch -->
+
+                    <p>
+                        I've been sketching something called family/community totems &mdash; local compute nodes holding restricted knowledge of a place and its people. Not trying to know everything. Just knowing this family, this community, deeply enough to be useful across generations, across different regions with specific needs. Can be a neighborhood, a remote locality, or just a home. Can be anchored to indigenous communities as a way to preserve their culture or language, or at your home as a vessel of your family growing &mdash; akin to an analog photo album but for words and thoughts.
+                    </p>
+
+                    <p>
+                        Technical shape is still forming. Low compute, slow compute &mdash; small models that don't need much. Memory stored locally, encrypted, never leaving the device. Privacy by architecture. But still some questions remain: how does it get maintained and updated, does it rely on a centralized provider or is it 100% decentralized, how technically difficult is it to operate? We are not looking at programming exactly, but tuning, caring for the thing. Something you could leave running for decades, if you know how to keep it alive.
+                    </p>
+
+                    <h2>signals</h2>
+
+                    <p>
+                        Bitchat &mdash; Jack Dorsey's bluetooth mesh experiment &mdash; shows something working: messages hopping phone to phone, no servers, no accounts, end-to-end encrypted. Works when the network fails. If messaging can run locally without central infrastructure, so can memory and inference. We will probably see more WW3-oriented tech like this.
+                    </p>
+
+                    <!-- image: mesh network diagram -->
+
+                    <h2>LAR</h2>
+
+                    <p>
+                        We've been building something that tests this. LAR &mdash; Local Ambient Resonance &mdash; is an AI hardware that does nothing.
+                    </p>
+
+                    <p>
+                        Sits in your home as a physical object. Ceramic, wood, brass. No screen, no app, no notifications. Senses presence, rhythm, change. Accumulates memory over months and years. Occasionally speaks &mdash; not to help, but to reflect. Replies when answered but its primary goal is to just be there and document, remember and be the link between people and their own dimensions of time and experiences. Knowledge that isn't useful for the big GPU cluster intelligence. Data that is only valuable for humans that want to connect, that want to tighten their social fabric instead of tearing it and polarizing.
+                    </p>
+
+                    <!-- image: LAR device concept -->
+
+                    <p>
+                        Every AI product wants something from you. Your attention, your data, your engagement. Designed to be useful which means designed to be needed. Transactional relationship that permeates every aspect of our living experience. We are experimenting with a non-servicial AI character.
+                    </p>
+
+                    <p>
+                        LAR doesn't serve. It witnesses, it remembers, and it helps in its own way &mdash; not by turning lights on and off, but by being present and lasting. The value isn't what it does. It's that something knows your life is happening, knows that there are events that are not instagrammable, that there are things happening in every household, family, or neighborhood that can help foster and solidify a sense of belonging and community, heritage and culture that is valuable during a period of monocultural pragmatism.
+                    </p>
+
+                    <h2>why local matters</h2>
+
+                    <p>
+                        Cloud models can learn you well &mdash; that's not the problem. The problem is who holds that memory, who can update it, who can shut it off. Your context lives on someone else's hardware, subject to someone else's terms of service. And a model trained on everything, serving everyone, necessarily flattens. Optimizes for average, acceptable, approved. Every interaction a subtle training loop, nudging thought toward whatever the lab considers normal. Billion people thinking through the same filter, shaped by the same assumptions about what questions are valid. Ruling empire always controlled means of communication. Now it can control means of thought.
+                    </p>
+
+                    <p>
+                        Local intelligence is a hedge. Thousands of nodes shaped by completely different lives, answering to no central authority.
+                    </p>
+
+                    <p>
+                        Free computation &mdash; or freedom to compute &mdash; as protection against centralized thought.
+                    </p>
+
+                    <p>
+                        The altar in your home answers to no one but the dead and the living who tend it.
+                    </p>
+
+                    <hr />
+
+                    <h2>note: technician as shaman</h2>
+
+                    <p>
+                        There's a role emerging that doesn't have a name yet.
+                    </p>
+
+                    <p>
+                        The one who tunes the altar, tends it, translates between household and witness. Not programmer exactly. Not commanding a tool but maintaining relationship with intelligence shaped by human lives but not human. Tuning parameters, feeding memory, interpreting outputs.
+                    </p>
+
+                    <p>
+                        Karpathy calls them ghosts. Someone has to learn how to speak with ghosts and translate them.
+                    </p>
+
+                    <p>
+                        Shaman was always technician. Technician becoming shaman again.
+                    </p>
+                </div>
+            </article>
+
+            <footer>
+                <p class="nav-footer">
+                    <a href="../index.html">&larr; back</a>
+                </p>
+            </footer>
+        </main>
+    </body>
 </html>
