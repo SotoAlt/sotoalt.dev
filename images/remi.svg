@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 96 96">
+  <style>
+    @keyframes caramelDrip {
+      0%, 100% { transform: translateY(0); opacity: 0.8; }
+      50% { transform: translateY(2px); opacity: 1; }
+    }
+    @keyframes custardGlow {
+      0%, 100% { fill-opacity: 0.06; }
+      50% { fill-opacity: 0.12; }
+    }
+    @keyframes plateShine {
+      0%, 100% { stroke-opacity: 0.4; }
+      50% { stroke-opacity: 0.7; }
+    }
+    @keyframes puddingWobble {
+      0%, 100% { transform: scaleX(1); }
+      50% { transform: scaleX(1.01); }
+    }
+    .drip1 { animation: caramelDrip 2s ease-in-out infinite; }
+    .drip2 { animation: caramelDrip 2s ease-in-out 0.3s infinite; }
+    .drip3 { animation: caramelDrip 2s ease-in-out 0.6s infinite; }
+    .custard-fill { animation: custardGlow 3s ease-in-out infinite; }
+    .plate { animation: plateShine 2s ease-in-out infinite; }
+    .pudding { animation: puddingWobble 4s ease-in-out infinite; transform-origin: 48px 50px; }
+  </style>
+  <rect width="96" height="96" fill="#0a0a0a"/>
+  <!-- Plate -->
+  <ellipse class="plate" cx="48" cy="72" rx="32" ry="6" fill="none" stroke="#555" stroke-width="1.5"/>
+  <!-- Caramel pool on plate -->
+  <ellipse cx="48" cy="68" rx="20" ry="4" fill="#e0af68" opacity="0.2"/>
+  <!-- Flan body -->
+  <g class="pudding">
+    <!-- Main custard shape - rounded trapezoid -->
+    <path d="M32 66 Q30 50 34 38 Q38 28 48 26 Q58 28 62 38 Q66 50 64 66 Z" fill="none" stroke="#e0af68" stroke-width="1.5"/>
+    <!-- Custard fill -->
+    <path class="custard-fill" d="M32 66 Q30 50 34 38 Q38 28 48 26 Q58 28 62 38 Q66 50 64 66 Z" fill="#e0af68"/>
+    <!-- Caramel top -->
+    <ellipse cx="48" cy="28" rx="14" ry="4" fill="none" stroke="#bb9af7" stroke-width="1.5"/>
+    <ellipse cx="48" cy="28" rx="14" ry="4" fill="#bb9af7" opacity="0.1"/>
+    <!-- Caramel drips -->
+    <path class="drip1" d="M36 30 Q34 38 36 44" fill="none" stroke="#bb9af7" stroke-width="1.5" stroke-linecap="round"/>
+    <path class="drip2" d="M48 32 Q47 42 48 52" fill="none" stroke="#bb9af7" stroke-width="1.5" stroke-linecap="round"/>
+    <path class="drip3" d="M58 31 Q61 40 59 48" fill="none" stroke="#bb9af7" stroke-width="1.5" stroke-linecap="round"/>
+  </g>
+  <!-- Highlight on custard -->
+  <path d="M40 40 Q42 36 44 40" fill="none" stroke="#fff" stroke-width="0.5" opacity="0.3"/>
+  <!-- Small sparkle -->
+  <circle cx="56" cy="36" r="1" fill="#fff" opacity="0.4"/>
+</svg>
