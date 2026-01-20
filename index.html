@@ -1,179 +1,139 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>sotoalt</title>
-    <meta name="description" content="thoughts, experiments, and rabbit holes">
-    <link rel="stylesheet" href="style.css">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>~</text></svg>">
-</head>
-<body>
-    <main>
-        <header>
-            <pre class="sigil" aria-hidden="true">
-    *
-   /|\
-  / | \
- /  |  \
-*---+---*
- \  |  /
-  \ | /
-   \|/
-    *
-            </pre>
-            <h1>SotoAlt</h1>
-            <p class="tagline">creative/tech</p>
-        </header>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>sotoalt</title>
+        <meta
+            name="description"
+            content="thoughts, experiments, and rabbit holes"
+        />
+        <link rel="stylesheet" href="style.css" />
+        <link
+            rel="icon"
+            href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>~</text></svg>"
+        />
+    </head>
+    <body>
+        <main>
+            <header>
+                <pre class="sigil" aria-hidden="true">(￣▽￣)ノ</pre>
+                <h1>SotoAlt</h1>
+                <p class="tagline">creative/tech</p>
+            </header>
 
-        <nav>
-            <a href="#now">now</a>
-            <span class="sep">/</span>
-            <a href="#thoughts">thoughts</a>
-            <span class="sep">/</span>
-            <a href="#experiments">experiments</a>
-            <span class="sep">/</span>
-            <a href="#links">links</a>
-        </nav>
+            <nav>
+                <a href="#projects">projects</a>
+                <span class="sep">/</span>
+                <a href="#thoughts">thoughts</a>
+                <span class="sep">/</span>
+                <a href="#links">links</a>
+            </nav>
 
-        <hr>
+            <hr />
 
-        <section id="intro">
-            <p>
-                i like computers, systems and games. trying to create cool stuff and document it.
-            </p>
-        </section>
+            <section id="intro">
+                <p>
+                    i like computers, systems and digital experiences. i run a
+                    creative studio, trying to create cool stuff and document
+                    it.
+                </p>
+            </section>
 
-        <hr>
+            <hr />
 
-        <section id="now">
-            <h2>// now</h2>
-            <p class="updated">last updated: 2025-01</p>
-            <ul>
-                <li>
-                    <strong>WAWE</strong> &mdash; building a memory-first multi-agent system.
-                    Agents coordinating through a shared SQLite brain. Claude instances
-                    spawning in isolated git worktrees. It's getting weird.
-                </li>
-                <li>
-                    <strong>Tellura</strong> &mdash; tokenizing real copper warrants on-chain.
-                    Bridging the gap between physical commodities and DeFi.
-                </li>
-                <li>
-                    <strong>Amiwo</strong> &mdash; a personal UV and air quality device.
-                    nRF52, BLE, and making the invisible visible.
-                </li>
-                <li>
-                    Reading: <em>The Art of Doing Science and Engineering</em> by Hamming.
-                    Thinking about what matters.
-                </li>
-            </ul>
-        </section>
 
-        <hr>
+            <section id="thoughts">
+                <h2>// thoughts</h2>
+                <ul class="posts">
+                    <li>
+                        <span class="date">2026.01</span>
+                        <a href="thoughts/agents-as-organisms.html"
+                            >agents as organisms</a
+                        >
+                    </li>
+                </ul>
+            </section>
 
-        <section id="thoughts">
-            <h2>// thoughts</h2>
-            <ul class="posts">
-                <li>
-                    <span class="date">2026.01</span>
-                    <a href="thoughts/agents-as-organisms.html">agents as organisms</a>
-                </li>
-                <li>
-                    <span class="date">2026.01</span>
-                    <a href="thoughts/invisible-infrastructure.html">invisible infrastructure</a>
-                </li>
-                <li>
-                    <span class="date">2026.01</span>
-                    <a href="thoughts/hardware-software-convergence.html">hardware software convergence</a>
-                </li>
-                <li>
-                    <span class="date">2026.01</span>
-                    <a href="thoughts/tokenization-beyond-finance.html">tokenization beyond finance</a>
-                </li>
-                <li>
-                    <span class="date">2026.01</span>
-                    <a href="thoughts/terminal-as-interface.html">terminal as interface</a>
-                </li>
-                <li>
-                    <span class="date">2026.01</span>
-                    <a href="thoughts/coordination-without-control.html">coordination without control</a>
-                </li>
-            </ul>
-        </section>
+            <hr />
 
-        <hr>
+            <section id="projects">
+                <h2>// projects</h2>
 
-        <section id="experiments">
-            <h2>// experiments</h2>
-            <p>things I've built, broke, or am still figuring out:</p>
-
-            <div class="project-card">
-                <div class="project-thumb">
-                    <img src="images/wawe.svg" alt="WAWE icon">
+                <div class="project-card">
+                    <div class="project-thumb">
+                        <img src="images/wawe.svg" alt="WAWE icon" />
+                    </div>
+                    <div class="project-info">
+                        <a href="https://wawe.studio">wawe</a>
+                        <span class="desc"
+                            >creative digital studio. working on ai native ip,
+                            agents and consumer apps.</span
+                        >
+                    </div>
                 </div>
-                <div class="project-info">
-                    <a href="https://github.com/sotoalt/wawe">wawe</a>
-                    <span class="desc">multi-agent orchestration system. Claude instances coordinating through shared memory.</span>
+
+                <div class="project-card">
+                    <div class="project-thumb">
+                        <img src="images/tellura.svg" alt="Tellura icon" />
+                    </div>
+                    <div class="project-info">
+                        <a href="https://tellura.io">tellura</a>
+                        <span class="desc"
+                            >tokenizing physical copper, solar energy and
+                            computing power.</span
+                        >
+                    </div>
                 </div>
-            </div>
 
-            <div class="project-card">
-                <div class="project-thumb">
-                    <img src="images/tellura.svg" alt="Tellura icon">
+                <div class="project-card">
+                    <div class="project-info">
+                        <span class="wip">remi online</span>
+                        <span class="desc"
+                            >a launchpad and marketplace for ai native ip.</span
+                        >
+                    </div>
                 </div>
-                <div class="project-info">
-                    <a href="https://tellura.io">tellura</a>
-                    <span class="desc">tokenized copper warrants. bridging physical commodities and DeFi.</span>
+
+                <div class="project-card">
+                    <div class="project-thumb">
+                        <img src="images/qbots.svg" alt="QBots icon" />
+                    </div>
+                    <div class="project-info">
+                        <a href="https://qbots.io">qbots_online</a>
+                        <span class="desc"
+                            >a pvp ai game with real stakes. exploring resonance
+                            and gaming on the latent space.</span
+                        >
+                    </div>
                 </div>
-            </div>
+            </section>
 
-            <div class="project-card">
-                <div class="project-thumb">
-                    <img src="images/amiwo.svg" alt="Amiwo icon">
-                </div>
-                <div class="project-info">
-                    <span class="wip">amiwo</span>
-                    <span class="desc">personal UV and air quality device. nRF52, BLE, making the invisible visible. [wip]</span>
-                </div>
-            </div>
+            <hr />
 
-            <div class="project-card">
-                <div class="project-thumb">
-                    <img src="images/qbots.svg" alt="QBots icon">
-                </div>
-                <div class="project-info">
-                    <a href="https://qbots.io">qbots</a>
-                    <span class="desc">crypto arena game. robots, stakes, and on-chain mayhem.</span>
-                </div>
-            </div>
-        </section>
+            <section id="links">
+                <h2>// elsewhere</h2>
+                <ul class="links">
+                    <li><a href="https://github.com/sotoalt">github</a></li>
+                    <li><a href="https://twitter.com/sotoalt">twitter</a></li>
+                    <li><a href="mailto:rodrigo@sotoalt.com">email</a></li>
+                </ul>
+            </section>
 
-        <hr>
+            <hr />
 
-        <section id="links">
-            <h2>// elsewhere</h2>
-            <ul class="links">
-                <li><a href="https://github.com/sotoalt">github</a></li>
-                <li><a href="https://twitter.com/sotoalt">twitter</a></li>
-                <li><a href="mailto:rodrigo@sotoalt.com">email</a></li>
-            </ul>
-        </section>
+            <footer>
+                <p class="colophon">
+                    <span class="symbol">&#x2609;</span>
+                    no frameworks. no tracking. just html.
+                    <span class="symbol">&#x263D;</span>
+                </p>
+            </footer>
+        </main>
 
-        <hr>
-
-        <footer>
-            <p class="colophon">
-                <span class="symbol">&#x2609;</span>
-                no frameworks. no tracking. just html.
-                <span class="symbol">&#x263D;</span>
-            </p>
-        </footer>
-    </main>
-
-    <div class="glyph top-left" aria-hidden="true">&#x2727;</div>
-    <div class="glyph top-right" aria-hidden="true">&#x2726;</div>
-    <div class="glyph bottom-left" aria-hidden="true">&#x2726;</div>
-    <div class="glyph bottom-right" aria-hidden="true">&#x2727;</div>
-</body>
+        <div class="glyph top-left" aria-hidden="true">&#x2727;</div>
+        <div class="glyph top-right" aria-hidden="true">&#x2726;</div>
+        <div class="glyph bottom-left" aria-hidden="true">&#x2726;</div>
+        <div class="glyph bottom-right" aria-hidden="true">&#x2727;</div>
+    </body>
 </html>
