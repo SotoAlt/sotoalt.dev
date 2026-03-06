@@ -1,47 +1,55 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 96 96">
   <style>
-    @keyframes staffGlow { 0%, 100% { opacity: 0.6; } 50% { opacity: 1; } }
-    @keyframes shapeRotate { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-    @keyframes floatUp { 0%, 100% { transform: translateY(0); opacity: 0.7; } 50% { transform: translateY(-3px); opacity: 1; } }
-    @keyframes sparkle { 0%, 100% { opacity: 0; r: 1; } 50% { opacity: 1; r: 1.5; } }
-    .staff-glow { animation: staffGlow 2s ease-in-out infinite; }
-    .shape1 { animation: floatUp 2s ease-in-out infinite; transform-origin: 68px 28px; }
-    .shape2 { animation: floatUp 2.5s ease-in-out 0.4s infinite; transform-origin: 22px 32px; }
-    .shape3 { animation: floatUp 2s ease-in-out 0.8s infinite; transform-origin: 72px 52px; }
-    .spin { animation: shapeRotate 6s linear infinite; transform-origin: 68px 28px; }
-    .spark1 { animation: sparkle 1.5s ease-in-out infinite; }
-    .spark2 { animation: sparkle 1.5s ease-in-out 0.5s infinite; }
-    .spark3 { animation: sparkle 1.5s ease-in-out 1s infinite; }
+    @keyframes arenaFlicker { 0%, 100% { stroke-opacity: 0.3; } 30% { stroke-opacity: 0.8; } 60% { stroke-opacity: 0.2; } }
+    @keyframes chaosSpin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    @keyframes chaosSpinReverse { 0% { transform: rotate(360deg); } 100% { transform: rotate(0deg); } }
+    @keyframes pulse { 0%, 100% { opacity: 0.4; } 50% { opacity: 1; } }
+    @keyframes float1 { 0%, 100% { transform: translate(0,0); } 50% { transform: translate(2px,-3px); } }
+    @keyframes float2 { 0%, 100% { transform: translate(0,0); } 50% { transform: translate(-3px,2px); } }
+    @keyframes float3 { 0%, 100% { transform: translate(0,0); } 50% { transform: translate(1px,3px); } }
+    @keyframes zap { 0%, 80%, 100% { opacity: 0; } 85%, 95% { opacity: 0.9; } }
+    .arena { animation: arenaFlicker 3s ease-in-out infinite; }
+    .ring1 { animation: chaosSpin 8s linear infinite; transform-origin: 48px 48px; }
+    .ring2 { animation: chaosSpinReverse 12s linear infinite; transform-origin: 48px 48px; }
+    .piece1 { animation: float1 2s ease-in-out infinite; }
+    .piece2 { animation: float2 2.5s ease-in-out 0.3s infinite; }
+    .piece3 { animation: float3 1.8s ease-in-out 0.6s infinite; }
+    .core { animation: pulse 1.5s ease-in-out infinite; }
+    .bolt1 { animation: zap 2s ease-in-out infinite; }
+    .bolt2 { animation: zap 2s ease-in-out 0.7s infinite; }
+    .bolt3 { animation: zap 2s ease-in-out 1.4s infinite; }
   </style>
   <rect width="96" height="96" fill="#0a0a0a"/>
-  <!-- Wizard hat -->
-  <polygon points="42,22 48,10 54,22" fill="#bb9af7" opacity="0.8"/>
-  <line x1="42" y1="22" x2="54" y2="22" stroke="#bb9af7" stroke-width="1.5"/>
-  <!-- Hat brim -->
-  <ellipse cx="48" cy="23" rx="10" ry="2.5" fill="none" stroke="#bb9af7" stroke-width="1"/>
-  <!-- Face area hint -->
-  <circle cx="48" cy="30" r="6" fill="none" stroke="#555" stroke-width="0.8"/>
-  <circle cx="46" cy="29" r="1" fill="#bb9af7" opacity="0.7"/>
-  <circle cx="50" cy="29" r="1" fill="#bb9af7" opacity="0.7"/>
-  <!-- Staff -->
-  <line x1="34" y1="26" x2="28" y2="78" stroke="#888" stroke-width="2" stroke-linecap="round"/>
-  <circle class="staff-glow" cx="34" cy="24" r="3" fill="#bb9af7" opacity="0.6"/>
-  <!-- Floating chaos shapes -->
-  <g class="spin">
-    <rect class="shape1" x="63" y="23" width="10" height="10" fill="none" stroke="#f7768e" stroke-width="1.5" rx="1"/>
+  <!-- Arena hexagon -->
+  <polygon class="arena" points="48,18 72,33 72,63 48,78 24,63 24,33" fill="none" stroke="#f7768e" stroke-width="1"/>
+  <!-- Orbiting chaos rings -->
+  <g class="ring1">
+    <circle cx="48" cy="48" r="22" fill="none" stroke="#bb9af7" stroke-width="0.7" stroke-dasharray="3,8"/>
   </g>
-  <g class="shape2">
-    <polygon points="22,26 18,38 26,38" fill="none" stroke="#e0af68" stroke-width="1.5"/>
+  <g class="ring2">
+    <circle cx="48" cy="48" r="16" fill="none" stroke="#f7768e" stroke-width="0.7" stroke-dasharray="5,6"/>
   </g>
-  <g class="shape3">
-    <circle cx="72" cy="52" r="5" fill="none" stroke="#7aa2f7" stroke-width="1.5"/>
+  <!-- Floating game pieces -->
+  <g class="piece1">
+    <rect x="30" y="34" width="7" height="7" rx="1" fill="none" stroke="#9ece6a" stroke-width="1.5"/>
+    <circle cx="33.5" cy="37.5" r="1" fill="#9ece6a" opacity="0.7"/>
   </g>
-  <!-- Chaos energy lines -->
-  <line x1="37" y1="24" x2="60" y2="28" stroke="#f7768e" stroke-width="0.5" opacity="0.4" stroke-dasharray="2,3"/>
-  <line x1="37" y1="24" x2="22" y2="32" stroke="#e0af68" stroke-width="0.5" opacity="0.4" stroke-dasharray="2,3"/>
-  <line x1="37" y1="24" x2="70" y2="50" stroke="#7aa2f7" stroke-width="0.5" opacity="0.4" stroke-dasharray="2,3"/>
-  <!-- Sparkles -->
-  <circle class="spark1" cx="58" cy="18" r="1" fill="#f7768e"/>
-  <circle class="spark2" cx="76" cy="40" r="1" fill="#bb9af7"/>
-  <circle class="spark3" cx="16" cy="44" r="1" fill="#e0af68"/>
+  <g class="piece2">
+    <polygon points="62,38 58,46 66,46" fill="none" stroke="#e0af68" stroke-width="1.5"/>
+    <circle cx="62" cy="43" r="1" fill="#e0af68" opacity="0.7"/>
+  </g>
+  <g class="piece3">
+    <circle cx="44" cy="62" r="4" fill="none" stroke="#7aa2f7" stroke-width="1.5"/>
+    <circle cx="44" cy="62" r="1" fill="#7aa2f7" opacity="0.7"/>
+  </g>
+  <!-- Central chaos core -->
+  <circle class="core" cx="48" cy="48" r="4" fill="#f7768e" opacity="0.4"/>
+  <circle cx="48" cy="48" r="2" fill="#f7768e" opacity="0.6"/>
+  <!-- Lightning bolts connecting core to pieces -->
+  <polyline class="bolt1" points="46,46 40,42 36,38" fill="none" stroke="#9ece6a" stroke-width="0.8"/>
+  <polyline class="bolt2" points="50,46 56,42 60,40" fill="none" stroke="#e0af68" stroke-width="0.8"/>
+  <polyline class="bolt3" points="47,50 45,56 44,58" fill="none" stroke="#7aa2f7" stroke-width="0.8"/>
+  <!-- Corner sparks -->
+  <circle cx="30" cy="24" r="1" fill="#bb9af7" opacity="0.3"/>
+  <circle cx="68" cy="72" r="1" fill="#f7768e" opacity="0.3"/>
 </svg>
