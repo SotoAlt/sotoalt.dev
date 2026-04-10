@@ -280,7 +280,7 @@
   <header>
     <div>
       <div class="mark"><span class="bracket">[</span><span class="accent">lepong</span><span class="bracket">]</span> pixel-input jepa</div>
-      <div class="tag"><strong>13M-param JEPA plays pong from pixels.</strong> Toggle occlusion with q/w/e/r to blind the AI. Move your mouse to play.</div>
+      <div class="tag"><strong>A neural network plays pong by watching pixels — no game state, no physics engine.</strong> Move your mouse to play against it.</div>
     </div>
     <div class="meta">
       <div><span class="k">server</span> <span class="v" id="meta-server">connecting…</span><span class="status-dot off" id="dot-status"></span></div>
@@ -290,7 +290,8 @@
   </header>
 
   <div class="honest">
-    <strong>How it works:</strong> canvas → PNG → server (frozen CNN encoder + transformer predictor + linear state head) → predicted ball_y → paddle. No game state, only pixels. The classical baseline cheats with ground truth for comparison.
+    <strong>What is JEPA?</strong> Joint Embedding Predictive Architecture — a neural network that learns to predict the next state of a scene from pixel observations. Instead of generating future frames (like a video model), it predicts in a compressed latent space, making it fast enough to run in real time.<br><br>
+    <strong>This experiment:</strong> the left paddle is controlled entirely by a 13M-parameter JEPA. Every ~6 times per second, this page captures a 128x128 screenshot of the game, sends it to a server running the neural network, and gets back a predicted ball position. The paddle moves to that prediction. No physics engine, no game state — the model only sees pixels and must figure out where the ball is going.
   </div>
 
   <div class="game">
@@ -319,33 +320,41 @@
       <div class="section">
         <div class="section-title">ai paddle mode</div>
         <div class="modes">
-          <button id="mode-jepa" class="active" onclick="setMode('jepa')" title="JEPA neural network predicts ball position from pixels and drives the paddle">
+          <button id="mode-jepa" class="active" onclick="setMode('jepa')" title="Neural network predicts ball position from pixels">
             JEPA <span class="k">1</span>
           </button>
-          <button id="mode-classical" onclick="setMode('classical')" title="Oracle baseline — uses ground truth state + 5-step physics integration (unfair advantage)">
+          <button id="mode-classical" onclick="setMode('classical')" title="Physics oracle with ground truth (unfair baseline)">
             CLASSICAL <span class="k">2</span>
           </button>
-          <button id="mode-reactive" onclick="setMode('reactive')" title="Naive tracker — paddle follows current ball.y with no prediction">
+          <button id="mode-reactive" onclick="setMode('reactive')" title="Follows current ball.y — no prediction">
             REACTIVE <span class="k">3</span>
           </button>
+        </div>
+        <div style="font-size:10px;color:var(--ink-low);margin-top:6px;line-height:1.5;">
+          <strong style="color:var(--cyan);font-weight:500;">JEPA</strong> = neural net reads pixels, predicts ball position &nbsp;
+          <strong style="color:var(--ink-dim);font-weight:500;">CLASSICAL</strong> = physics oracle (has ground truth, unfair) &nbsp;
+          <strong style="color:var(--ink-dim);font-weight:500;">REACTIVE</strong> = just follows current ball.y, no prediction
         </div>
       </div>
 
       <div class="section">
-        <div class="section-title">occlusion</div>
+        <div class="section-title">occlusion (optional experiment)</div>
         <div class="modes">
-          <button id="occ-0" class="active" onclick="setOcclusion(0.0)" title="Model sees the full court — training distribution">
+          <button id="occ-0" class="active" onclick="setOcclusion(0.0)" title="Full court visible — default">
             0 % <span class="k">q</span>
           </button>
-          <button id="occ-20" onclick="setOcclusion(0.2)" title="Right 20% of the model's input is blacked out">
+          <button id="occ-20" onclick="setOcclusion(0.2)" title="Right 20% hidden from the model">
             20 % <span class="k">w</span>
           </button>
-          <button id="occ-40" onclick="setOcclusion(0.4)" title="Right 40% blacked out — baseline model collapses here">
+          <button id="occ-40" onclick="setOcclusion(0.4)" title="Right 40% hidden — watch the model struggle">
             40 % <span class="k">e</span>
           </button>
-          <button id="occ-60" onclick="setOcclusion(0.6)" title="Right 60% blacked out — extreme occlusion test">
+          <button id="occ-60" onclick="setOcclusion(0.6)" title="Right 60% hidden — extreme test">
             60 % <span class="k">r</span>
           </button>
+        </div>
+        <div style="font-size:10px;color:var(--ink-low);margin-top:6px;line-height:1.5;">
+          Blacks out a portion of the image before the model sees it. You still see the full court. Try 40% and watch how the AI degrades.
         </div>
       </div>
 
@@ -798,18 +807,7 @@ function displayRender() {
     ctx.setLineDash([]);
   }
 
-  // Debug overlay (top-left of canvas)
-  ctx.fillStyle = '#7a7e92';
-  ctx.font = '11px "JetBrains Mono", monospace';
-  ctx.textAlign = 'left';
-  ctx.fillText(`mode: ${mode}  history: ${historyReady ? 'ready' : 'warming'}  occ: ${Math.round(OCCLUSION_FRAC * 100)}%`, 12, 18);
-  if (jepaPred !== null) {
-    ctx.fillText(`jepa  x=${jepaPred.ball_x.toFixed(3)} y=${jepaPred.ball_y.toFixed(3)}  padL: ${padL.toFixed(3)}`, 12, 32);
-  }
-  if (classicalBaselineBallY !== null) {
-    const xStr = classicalBaselineBallX !== null ? classicalBaselineBallX.toFixed(3) : '—';
-    ctx.fillText(`class x=${xStr} y=${classicalBaselineBallY.toFixed(3)}  real x=${ball.x.toFixed(3)} y=${ball.y.toFixed(3)}`, 12, 46);
-  }
+  // Debug overlay removed for production
 }
 
 function draw() {
