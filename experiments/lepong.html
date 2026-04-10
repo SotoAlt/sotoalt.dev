@@ -748,6 +748,22 @@ function displayRender() {
     ctx.fillText(`blind to jepa (${Math.round(OCCLUSION_FRAC * 100)}%)`, occX + 8, cy0 + 14);
   }
 
+  // Scale marks along left edge — ruler ticks showing court positions.
+  // The mark closest to JEPA's predicted ball_y glows bright.
+  const nMarks = 9;
+  const padX0 = cx0 + PADDLE_MARGIN * scale;
+  for (let i = 0; i < nMarks; i++) {
+    const frac = (i + 0.5) / nMarks;
+    const markY = cy0 + frac * courtH;
+    const markCourtY = frac * COURT_H;
+    // Highlight the mark closest to JEPA's prediction
+    const isTarget = jepaPred !== null && Math.abs(markCourtY - jepaPred.ball_y) < (COURT_H / nMarks / 2);
+    ctx.fillStyle = isTarget ? 'rgba(79, 232, 214, 0.7)' : 'rgba(79, 232, 214, 0.12)';
+    const mW = isTarget ? 14 : 10;
+    const mH = isTarget ? 5 : 3;
+    ctx.fillRect(padX0 - mW - 4, markY - mH / 2, mW, mH);
+  }
+
   // Paddles
   const padWpx = PADDLE_W * scale * 1.8;
   const padHpx = PADDLE_H * scale;
