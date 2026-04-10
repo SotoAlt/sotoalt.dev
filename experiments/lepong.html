@@ -280,7 +280,7 @@
   <header>
     <div>
       <div class="mark"><span class="bracket">[</span><span class="accent">lepong</span><span class="bracket">]</span> pixel-input jepa</div>
-      <div class="tag"><strong>Honest world-model demo.</strong> Client renders canvas → sends PNG bytes. Server only sees pixels: no ball state, no re-rendering. Right 40% of the court is blackened before sending, so the model must imagine the ball in the hidden region. <strong>Compare JEPA against a trivial classical extrapolator and honestly report whichever wins.</strong></div>
+      <div class="tag"><strong>13M-param JEPA plays pong from pixels.</strong> Toggle occlusion with q/w/e/r to blind the AI. Move your mouse to play.</div>
     </div>
     <div class="meta">
       <div><span class="k">server</span> <span class="v" id="meta-server">connecting…</span><span class="status-dot off" id="dot-status"></span></div>
@@ -290,7 +290,7 @@
   </header>
 
   <div class="honest">
-    <strong>What this is.</strong> The client draws the Pong game on a canvas, blackens the right 40%, PNG-encodes it, and sends bytes to the server. The server encodes the PNG through a <strong>genuinely frozen</strong> CNN encoder + 6-layer transformer predictor, reads <code>ball_y</code> from a trained <code>Linear(192, 10)</code> state head, and sends that value back as the paddle target. A classical extrapolator <code>ball.y + 5·ball.vy</code> is computed alongside for comparison — if it beats JEPA, the demo is honest about that and the blog reports the negative result. See <code>docs/RESEARCH_JOURNAL.md</code> April 8 (night) for the full story of how we got here.
+    <strong>How it works:</strong> canvas → PNG → server (frozen CNN encoder + transformer predictor + linear state head) → predicted ball_y → paddle. No game state, only pixels. The classical baseline cheats with ground truth for comparison.
   </div>
 
   <div class="game">
@@ -300,8 +300,18 @@
         <div class="score-col"><span class="label">JEPA</span><span class="jepa" id="score-top-l">0</span></div>
         <span class="sep">vs</span>
         <div class="score-col"><span class="label">YOU</span><span class="you" id="score-top-r">0</span></div>
+        <button id="pause-btn" onclick="togglePause()" title="Pause/resume game" style="margin-left:16px;background:var(--bg-3);border:1px solid var(--line-2);color:var(--ink-dim);font-family:inherit;font-size:11px;padding:4px 12px;border-radius:3px;cursor:pointer;">PAUSE</button>
       </div>
-      <canvas id="c" width="900" height="540"></canvas>
+      <div style="position:relative;">
+        <canvas id="c" width="900" height="540"></canvas>
+        <div id="loading-overlay" style="position:absolute;inset:0;background:rgba(10,10,18,0.95);display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:4px;z-index:10;">
+          <div style="font-size:24px;font-weight:800;color:var(--cyan);letter-spacing:0.05em;margin-bottom:8px;">LEPONG</div>
+          <div style="color:var(--ink-dim);font-size:12px;margin-bottom:20px;">loading neural network...</div>
+          <div style="width:120px;height:3px;background:var(--line);border-radius:2px;overflow:hidden;">
+            <div id="load-bar" style="height:100%;background:var(--cyan);width:0%;transition:width 0.3s;"></div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <div class="panel">
@@ -389,82 +399,33 @@
   <div class="explainer">
 
     <div class="card">
-      <span class="num">pipeline · pixels in</span>
-      <h3>canvas → PNG → JEPA</h3>
+      <span class="num">01</span>
+      <h3>pixels in, paddle out</h3>
       <p>
-        Every 5 physics ticks (≈6 Hz) the client draws the Pong game on an
-        <strong>offscreen 128×128 canvas</strong> whose JS render function is a line-by-line
-        reimplementation of <code>PongWorld.render()</code>
-        (<code>world_model/envs/pong_world.py:155</code>). If the occlusion slider above is
-        non-zero, the client also blanks out a vertical strip on the right side of that
-        canvas with <code>fillRect</code> before encoding. Then <code>toDataURL('image/png')</code>
-        and ship the base64 bytes over WebSocket to <code>/ws-pong-v2</code>.
-      </p>
-      <p>
-        The server <em>does</em> receive a <code>ground_truth</code> field in every message —
-        it uses it only for the classical baseline computation and for the per-tick verify log,
-        never as model input. The paddle target comes exclusively from
-        <code>state_head(predictor(encoder(client_png)))[ball_y]</code>. Trainable parameters:
-        1,930 (just the Linear(192, 10) state head). Frozen parameters: 13,082,080 (encoder +
-        predictor + projectors), with <code>requires_grad_(False)</code> asserted at load time.
-      </p>
-      <p><strong>Sanity check</strong>: if the model stopped running, the paddle would freeze
-      immediately (JEPA mode has no fallback). Open <code>/health</code> to see a full
-      <code>state_usage</code> breakdown.</p>
-    </div>
-
-    <div class="card">
-      <span class="num">partial observation · the lever</span>
-      <h3>occlusion slider (0% / 20% / 40% / 60%)</h3>
-      <p>
-        Pong physics between bounces are trivial. Any algorithm that sees the ball plays
-        near-optimally, which is why the v1 demo's "99% correlation" was a tautology. To
-        force an actual prediction task, the occlusion slider blanks out a vertical strip on
-        the <strong>right</strong> side of the canvas before it's encoded. At <strong>0%</strong>
-        the model sees the whole court. At <strong>40%</strong> the model sees nothing on the
-        right side and must imagine the ball whenever it crosses midfield.
-      </p>
-      <p>
-        You (the human) always see the whole court through the semi-transparent purple overlay
-        and control the right paddle with the mouse. Only the <em>encoder input</em> is
-        occluded — the display render is not.
-      </p>
-      <p>
-        This is an A/B dial: flip between 0% and 40% and watch whether the JEPA cyan ball
-        still sits on top of the white real ball, and whether the median error in the
-        <strong>live ball_y error</strong> panel climbs. The verify log tags every frame with
-        its <code>occlusion_frac</code> so a later analysis can slice metrics by occlusion.
+        Every ~6 Hz the client renders a 128×128 frame, optionally occludes the right side, and sends the PNG to the server. The server runs a frozen 13M-param CNN JEPA (encoder → predictor → state head) and returns the predicted <code>ball_y</code> as the paddle target. 1,930 trainable params. No game state, only pixels.
       </p>
     </div>
 
     <div class="card">
-      <span class="num">honest metrics</span>
-      <h3>what we actually measure</h3>
+      <span class="num">02</span>
+      <h3>the occlusion toggle</h3>
       <p>
-        Running <strong>p50 / p95 / max</strong> absolute error of JEPA's prediction and the
-        classical baseline vs ground truth, separately for <code>ball_y</code> and
-        <code>ball_x</code>. Every server tick is logged to <code>/tmp/pong_v2_verify.jsonl</code>
-        — no sampling, no filter. These are the numbers the blog cites.
+        At 0% the task is trivial — any tracker that sees the ball wins. Toggle to 40% (press <strong>e</strong>) and the right side goes dark before the model sees it. The model must imagine the ball through the blind zone. You still see the full court via the purple overlay. Watch the cyan JEPA ball and the error metrics as occlusion increases.
       </p>
+    </div>
+
+    <div class="card">
+      <span class="num">03</span>
+      <h3>what the metrics show</h3>
       <p>
-        The classical baseline is NOT a fair comparison — it has direct access to
-        ground-truth state and integrates physics (walls + no paddle lookahead) for 5 steps
-        from that state. JEPA has only the PNG bytes. When classical wins on median it's
-        because it's an oracle, not because the baseline is smart. The interesting questions
-        are: (a) how close does JEPA get despite having less information? (b) does JEPA's
-        tail (p95, max) degrade gracefully or catastrophically? (c) does occlusion break JEPA?
-      </p>
-      <p>
-        We do <strong>not</strong> cite the win-rate score against a human mouse opponent as a
-        research result — any paddle that reliably intercepts the ball wins 60:1 against a
-        casual human. The score is a playability sanity check, not a benchmark.
+        Live <strong>p50 / p95 / max</strong> error for JEPA vs a classical physics extrapolator, for both ball_y and ball_x. The classical baseline has ground truth (unfair advantage) — it's an oracle for comparison, not a competitor. Press <strong>R</strong> to reset the error buffers.
       </p>
     </div>
 
   </div>
 
   <footer>
-    <div>pong-v2 · aura project · april 2026 · honest world-model demo</div>
+    <div>lepong · april 2026</div>
     <div>
       <a href="/health" target="_blank">/health</a> ·
       <a href="https://github.com/SotoAlt/aura" target="_blank">repo</a>
@@ -1026,6 +987,7 @@ function connectWS() {
 // ============================================================================
 let physicsTick = 0;
 setInterval(() => {
+  if (paused) return;
   physics();
   physicsTick++;
 
@@ -1068,7 +1030,7 @@ document.addEventListener('keydown', (e) => {
   if (e.key === '1') setMode('jepa');
   if (e.key === '2') setMode('classical');
   if (e.key === '3') setMode('reactive');
-  if (e.key === '4') setMode('off');
+  if (e.key === 'p') togglePause();
   if (e.key === 'q') setOcclusion(0.0);
   if (e.key === 'w') setOcclusion(0.2);
   if (e.key === 'e') setOcclusion(0.4);
@@ -1083,23 +1045,52 @@ document.addEventListener('keydown', (e) => {
 });
 
 // ============================================================================
+// PAUSE
+// ============================================================================
+let paused = false;
+function togglePause() {
+  paused = !paused;
+  document.getElementById('pause-btn').textContent = paused ? 'PLAY' : 'PAUSE';
+}
+
+// ============================================================================
+// LOADING OVERLAY
+// ============================================================================
+let loadStart = Date.now();
+function updateLoadBar() {
+  const el = document.getElementById('loading-overlay');
+  if (!el) return;
+  const elapsed = (Date.now() - loadStart) / 1000;
+  const pct = Math.min(100, (elapsed / 4) * 80 + (wsOpen ? 20 : 0));
+  document.getElementById('load-bar').style.width = pct + '%';
+  if (elapsed > 4 && wsOpen) {
+    el.style.opacity = '0';
+    el.style.transition = 'opacity 0.5s';
+    setTimeout(() => el.style.display = 'none', 500);
+  } else {
+    requestAnimationFrame(updateLoadBar);
+  }
+}
+
+// ============================================================================
 // BOOT
 // ============================================================================
 resetBall();
 connectWS();
 draw();
+updateLoadBar();
+
+// Wrap physics in pause check
+
 </script>
 
 <section style="max-width: 680px; margin: 40px auto 0; padding: 0 24px 60px; font-family: 'JetBrains Mono', monospace; color: #7a7e92; font-size: 13px; line-height: 1.7;">
-  <h2 style="color: #d8dae5; font-size: 16px; margin-bottom: 12px;">about this demo</h2>
+  <h2 style="color: #d8dae5; font-size: 16px; margin-bottom: 12px;">about</h2>
   <p>
-    A <strong style="color:#d8dae5">13M-parameter CNN JEPA</strong> with a frozen backbone and a 1930-parameter Linear state head, trained on 30K Pong frames. It takes 3 frames of pixel history, runs a 6-layer transformer predictor, and reads <code style="color:#4fe8d6">ball_y</code> from the state head to drive the left paddle. No simulator, no game state — just pixels in, paddle target out.
+    The left paddle is controlled by a <strong style="color:#d8dae5">13M-parameter CNN JEPA</strong> that sees only pixels — no game state, no physics engine. It takes 3 frames of history, predicts where the ball will be next, and moves the paddle there. Trained on 30K Pong frames with a frozen encoder and a 1930-parameter state head.
   </p>
   <p style="margin-top:12px">
-    Toggle occlusion with <strong style="color:#d8dae5">q/w/e/r</strong> to see how the model handles partial observability. At 40%, the baseline model collapses — we fixed it with data augmentation (retraining only the state head on occluded frames, encoder stays frozen).
-  </p>
-  <p style="margin-top:12px">
-    Full research journal and code at <a href="https://github.com/SotoAlt/aura" style="color:#4fe8d6">github.com/SotoAlt/aura</a>.
+    Code and research journal at <a href="https://github.com/SotoAlt/aura" style="color:#4fe8d6">github.com/SotoAlt/aura</a>.
   </p>
 </section>
 

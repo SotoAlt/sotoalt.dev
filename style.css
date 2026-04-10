@@ -212,6 +212,13 @@ ul li::before {
     font-weight: 500;
 }
 
+.posts .desc-inline {
+    display: block;
+    color: var(--fg-muted);
+    font-size: 0.75rem;
+    margin-top: 0.2rem;
+}
+
 /* Projects list */
 .projects .desc {
     color: var(--fg-dim);
