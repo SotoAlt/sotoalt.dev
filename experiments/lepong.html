@@ -1230,14 +1230,72 @@ updateLoadBar();
 
 </script>
 
-<section style="max-width: 680px; margin: 40px auto 0; padding: 0 24px 60px; font-family: 'JetBrains Mono', monospace; color: #7a7e92; font-size: 13px; line-height: 1.7;">
-  <h2 style="color: #d8dae5; font-size: 16px; margin-bottom: 12px;">about</h2>
-  <p>
-    The left paddle is controlled by a <strong style="color:#d8dae5">13M-parameter CNN JEPA</strong> that sees only pixels — no game state, no physics engine. It takes 3 frames of history, predicts where the ball will be next, and moves the paddle there. Trained on 30K Pong frames with a frozen encoder and a 1930-parameter state head.
+<section style="max-width: 680px; margin: 40px auto 0; padding: 0 24px; font-family: 'JetBrains Mono', monospace; color: #7a7e92; font-size: 13px; line-height: 1.7;">
+
+  <h2 style="color: #d8dae5; font-size: 16px; margin-bottom: 16px; letter-spacing: 0.05em;">what we built</h2>
+
+  <p>The left paddle above is controlled entirely by a neural network. No physics engine, no game state — it watches pixels and decides where to move.</p>
+
+  <p style="margin-top:12px">The architecture is a <strong style="color:#4fe8d6">JEPA</strong> (Joint Embedding Predictive Architecture): instead of generating future video frames pixel by pixel, it predicts in a compressed latent space. This makes it fast enough to run in real time.</p>
+
+  <div style="background:#11121b;border:1px solid #232538;border-radius:4px;padding:16px;margin:16px 0;font-size:11px;line-height:1.8;color:#7a7e92;">
+    <div style="color:#4b4e63;margin-bottom:8px;font-size:10px;letter-spacing:0.1em;">PIPELINE</div>
+    <span style="color:#d8dae5;">128x128 frame</span> <span style="color:#4b4e63;">&rarr;</span>
+    <span style="color:#4fe8d6;">CNN encoder</span> <span style="color:#4b4e63;">(frozen)</span> <span style="color:#4b4e63;">&rarr;</span>
+    <span style="color:#d8dae5;">192-dim</span> <span style="color:#4b4e63;">&rarr;</span>
+    <span style="color:#4fe8d6;">6-layer transformer</span> <span style="color:#4b4e63;">(frozen)</span> <span style="color:#4b4e63;">&rarr;</span>
+    <span style="color:#f0b056;">Linear(192, 10)</span> <span style="color:#4b4e63;">&rarr;</span>
+    <span style="color:#d8dae5;">ball_y</span> <span style="color:#4b4e63;">&rarr;</span>
+    <span style="color:#4fe8d6;">paddle</span>
+    <div style="margin-top:10px;color:#4b4e63;font-size:10px;">
+      13M total params &middot; 1,930 trainable (just the orange layer) &middot; trained on 30K frames
+    </div>
+  </div>
+
+  <p>"Frozen" means the encoder and predictor weights never change after initial training — only the tiny linear state head (1,930 parameters out of 13 million) learns to read ball positions from the predictor's output. This is the <a href="https://arxiv.org/abs/2512.13644" style="color:#4fe8d6;">DexWM</a> recipe.</p>
+
+  <h2 style="color: #d8dae5; font-size: 16px; margin: 32px 0 16px; letter-spacing: 0.05em;">what we found</h2>
+
+  <div style="display:grid;gap:12px;margin-bottom:20px;">
+    <div style="background:#11121b;border:1px solid #232538;border-radius:4px;padding:14px 16px;">
+      <div style="color:#4fe8d6;font-size:10px;letter-spacing:0.1em;margin-bottom:6px;">FINDING 1 — IT WORKS</div>
+      <p style="margin:0"><strong style="color:#d8dae5;">2.8% median ball_y error</strong> on the training distribution. The model decodes ball position from pixels accurately enough to play interactively against a human.</p>
+    </div>
+    <div style="background:#11121b;border:1px solid #232538;border-radius:4px;padding:14px 16px;">
+      <div style="color:#f0b056;font-size:10px;letter-spacing:0.1em;margin-bottom:6px;">FINDING 2 — IT BREAKS UNDER DISTRIBUTION SHIFT</div>
+      <p style="margin:0">When the ball follows trajectories the model wasn't trained on (random paddle vs AI-tracked), controller success drops from <strong style="color:#d8dae5;">99.3% &rarr; 88.7%</strong>. Under 40% pixel occlusion (toggle it above with <strong style="color:#d8dae5;">E</strong>), the model collapses to its training mean.</p>
+    </div>
+    <div style="background:#11121b;border:1px solid #232538;border-radius:4px;padding:14px 16px;">
+      <div style="color:#5ce388;font-size:10px;letter-spacing:0.1em;margin-bottom:6px;">FINDING 3 — DATA AUGMENTATION PARTIALLY FIXES IT</div>
+      <p style="margin:0">Retraining only the 1,930-param state head on occluded frames improves ball_x error by <strong style="color:#d8dae5;">58%</strong> at 40% occlusion. Unexpectedly, it also fixes the trajectory OOD drop: ball_y degradation goes from <strong style="color:#d8dae5;">+125% &rarr; +6%</strong>.</p>
+    </div>
+    <div style="background:#11121b;border:1px solid #232538;border-radius:4px;padding:14px 16px;">
+      <div style="color:#d66ff0;font-size:10px;letter-spacing:0.1em;margin-bottom:6px;">FINDING 4 — PRETRAINED ENCODERS ARE 4-7x MORE ROBUST</div>
+      <p style="margin:0">A frozen DINOv2 (zero Pong training) handles 40% occlusion at cosine similarity <strong style="color:#d8dae5;">0.94</strong> while our CNN drops to <strong style="color:#d8dae5;">0.20</strong>. But our CNN wins at the actual task because it has a trained predictor. <strong style="color:#d8dae5;">Robustness and task precision are different things.</strong></p>
+    </div>
+  </div>
+
+  <h2 style="color: #d8dae5; font-size: 16px; margin: 32px 0 16px; letter-spacing: 0.05em;">reproduce</h2>
+
+  <div style="background:#11121b;border:1px solid #232538;border-radius:4px;padding:14px 16px;font-size:11px;">
+    <pre style="margin:0;color:#7a7e92;white-space:pre-wrap;font-family:inherit;"><span style="color:#4b4e63;"># clone and install</span>
+git clone https://github.com/SotoAlt/lepong
+cd lepong
+pip install torch torchvision fastapi uvicorn pillow numpy websockets
+
+<span style="color:#4b4e63;"># download model from huggingface</span>
+pip install huggingface_hub
+python -c "from huggingface_hub import hf_hub_download; hf_hub_download('sotoalt/lepong', 'lepong_statehead_occ_aug.pt', local_dir='checkpoints')"
+
+<span style="color:#4b4e63;"># run the demo</span>
+python -m server.infer --checkpoint checkpoints/lepong_statehead_occ_aug.pt --port 8791
+<span style="color:#4b4e63;"># open http://localhost:8791</span></pre>
+  </div>
+
+  <p style="margin-top:16px">
+    Code, model weights, and training data: <a href="https://github.com/SotoAlt/lepong" style="color:#4fe8d6">github.com/SotoAlt/lepong</a> &middot; <a href="https://huggingface.co/sotoalt/lepong" style="color:#4fe8d6">huggingface.co/sotoalt/lepong</a>
   </p>
-  <p style="margin-top:12px">
-    Code and research journal at <a href="https://github.com/SotoAlt/aura" style="color:#4fe8d6">github.com/SotoAlt/aura</a>.
-  </p>
+
 </section>
 
 <div class="related">
@@ -1253,10 +1311,15 @@ updateLoadBar();
       <div class="ri-title">autogen</div>
       <div class="ri-desc">browser-native artificial life powered by local AI</div>
     </a>
-    <a class="related-item" href="https://github.com/SotoAlt/aura" target="_blank">
+    <a class="related-item" href="https://github.com/SotoAlt/lepong" target="_blank">
       <div class="ri-date">repo</div>
-      <div class="ri-title">aura</div>
-      <div class="ri-desc">research journal, training scripts, full code</div>
+      <div class="ri-title">lepong</div>
+      <div class="ri-desc">model, training scripts, reproduction code</div>
+    </a>
+    <a class="related-item" href="https://huggingface.co/sotoalt/lepong" target="_blank">
+      <div class="ri-date">model</div>
+      <div class="ri-title">sotoalt/lepong</div>
+      <div class="ri-desc">checkpoints + training data on huggingface</div>
     </a>
   </div>
 </div>
