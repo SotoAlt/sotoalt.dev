@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <title>lepong — JEPA plays pong from pixels</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>~</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -178,11 +179,21 @@
     display: flex;
     justify-content: space-between;
   }
-  .modes button:hover { border-color: var(--cyan); color: var(--cyan); }
+  .modes button:hover { border-color: var(--ink-dim); color: var(--ink); }
   .modes button.active {
     border-color: var(--cyan);
     background: var(--cyan-soft);
     color: var(--cyan);
+  }
+  .modes button.active-amber {
+    border-color: var(--amber);
+    background: rgba(240, 176, 86, 0.12);
+    color: var(--amber);
+  }
+  .modes button.active-green {
+    border-color: var(--green);
+    background: rgba(92, 227, 136, 0.12);
+    color: var(--green);
   }
   .modes button .k { color: var(--ink-low); font-weight: 400; }
   .modes.amber button.active {
@@ -352,9 +363,9 @@
           </button>
         </div>
         <div style="font-size:10px;color:var(--ink-low);margin-top:6px;line-height:1.5;">
-          <strong style="color:var(--cyan);font-weight:500;">JEPA</strong> = neural net reads pixels, predicts ball position &nbsp;
-          <strong style="color:var(--ink-dim);font-weight:500;">CLASSICAL</strong> = physics oracle (has ground truth, unfair) &nbsp;
-          <strong style="color:var(--ink-dim);font-weight:500;">REACTIVE</strong> = just follows current ball.y, no prediction
+          <strong style="color:#4fe8d6;font-weight:500;">JEPA</strong> = neural net reads pixels, predicts ball &nbsp;
+          <strong style="color:#f0b056;font-weight:500;">CLASSICAL</strong> = physics oracle with ground truth &nbsp;
+          <strong style="color:#5ce388;font-weight:500;">REACTIVE</strong> = follows ball.y, no prediction
         </div>
       </div>
 
@@ -803,8 +814,8 @@ function displayRender() {
   // Paddles
   const padWpx = PADDLE_W * scale * 1.8;
   const padHpx = PADDLE_H * scale;
-  // left (AI, cyan)
-  ctx.fillStyle = mode === 'off' ? '#32343f' : '#4fe8d6';
+  // left (AI — color matches active mode)
+  ctx.fillStyle = MODE_COLORS[mode] ? MODE_COLORS[mode].canvas : '#32343f';
   ctx.fillRect(
     cx0 + PADDLE_MARGIN * scale,
     cy0 + (padL - PADDLE_H / 2) * scale,
@@ -920,11 +931,19 @@ function updateMetrics() {
 // ============================================================================
 // MODES
 // ============================================================================
+const MODE_COLORS = {
+  jepa: { css: 'active', canvas: '#4fe8d6' },
+  classical: { css: 'active-amber', canvas: '#f0b056' },
+  reactive: { css: 'active-green', canvas: '#5ce388' },
+};
 function setMode(m) {
   mode = m;
-  ['jepa', 'classical', 'reactive', 'off'].forEach(n => {
+  ['jepa', 'classical', 'reactive'].forEach(n => {
     const el = document.getElementById('mode-' + n);
-    if (el) el.classList.toggle('active', n === m);
+    if (el) {
+      el.classList.remove('active', 'active-amber', 'active-green');
+      if (n === m) el.classList.add(MODE_COLORS[n].css);
+    }
   });
   document.getElementById('meta-mode').textContent = m;
 }
