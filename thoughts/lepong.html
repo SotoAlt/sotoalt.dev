@@ -1,0 +1,1244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>lepong: pong ai in the browser / sotoalt</title>
+    <meta name="description" content="A 13M-parameter CNN JEPA plays Pong entirely in your browser via ONNX Runtime Web. No server needed.">
+    <link rel="stylesheet" href="../style.css">
+    <link rel="alternate" type="application/rss+xml" title="sotoalt RSS" href="../feed.xml">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>~</text></svg>">
+    <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web@1.21.0/dist/ort.min.js"></script>
+<style>
+/* =========================================================================
+   lepong — inline styles (game + article overrides)
+   ========================================================================= */
+
+/* Override parent stylesheet's body::after scanline so it doesn't overlay
+   our own CRT scanline on the game canvas */
+body { --lepong-amber: #f0a030; --lepong-cyan: #40e8d0; --lepong-magenta: #c070e0; }
+
+/* Game wrapper — allowed to go wider than --max-width */
+.game-section {
+    max-width: 860px;
+    margin: 0 auto 2rem;
+    padding: 0 1rem;
+}
+.game-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 12px;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+.game-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--lepong-amber);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    text-shadow: 0 0 16px rgba(240,160,48,0.2);
+}
+.game-title small {
+    display: block;
+    font-size: 0.65rem;
+    font-weight: 400;
+    color: var(--fg-dim);
+    letter-spacing: 0.02em;
+    text-transform: none;
+    margin-top: 2px;
+}
+.game-meta {
+    font-size: 0.65rem;
+    color: var(--fg-dim);
+    text-align: right;
+    line-height: 1.7;
+}
+.game-meta .val { color: var(--lepong-cyan); font-weight: 500; }
+.game-meta .val.amber { color: var(--lepong-amber); }
+.game-meta .val.off { color: var(--red); }
+
+/* Loading overlay */
+.game-loading {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: rgba(10,10,10,0.92);
+    z-index: 20;
+    font-size: 0.8rem;
+    color: var(--fg-dim);
+    gap: 12px;
+    border-radius: 4px;
+}
+.game-loading .spinner {
+    width: 28px;
+    height: 28px;
+    border: 2px solid var(--fg-muted);
+    border-top-color: var(--lepong-cyan);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.game-loading .status { color: var(--lepong-cyan); font-size: 0.7rem; }
+.game-loading.hidden { display: none; }
+
+/* Canvas wrapper */
+.canvas-wrap {
+    position: relative;
+    background: #08080c;
+    border: 1px solid var(--fg-muted);
+    border-radius: 6px;
+    padding: 6px;
+    /* CRT vignette */
+    box-shadow: inset 0 0 60px rgba(0,0,0,0.5), 0 0 24px rgba(240,160,48,0.04);
+}
+#gameCanvas {
+    display: block;
+    width: 100%;
+    border-radius: 3px;
+    cursor: none;
+}
+
+/* HUD bar under canvas */
+.hud {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 4px 0;
+    font-size: 0.6rem;
+    color: var(--fg-muted);
+    flex-wrap: wrap;
+    gap: 4px 12px;
+}
+.hud .controls span { color: var(--fg-dim); }
+.hud .controls kbd {
+    display: inline-block;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid var(--fg-muted);
+    border-radius: 3px;
+    padding: 0 4px;
+    font-family: inherit;
+    font-size: 0.6rem;
+    color: var(--fg-dim);
+    margin: 0 1px;
+}
+.hud .metrics-live span { margin-left: 8px; }
+.hud .metrics-live .k { color: var(--fg-muted); }
+.hud .metrics-live .v { color: var(--lepong-cyan); font-weight: 500; }
+.hud .metrics-live .v.amber { color: var(--lepong-amber); }
+
+/* =========================================================================
+   Article overrides
+   ========================================================================= */
+.article-section {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    padding: 0 1.5rem;
+}
+
+/* Tables in the article */
+.article-section table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.8rem;
+    margin: 1rem 0 1.5rem;
+}
+.article-section thead th {
+    text-align: left;
+    color: var(--fg-dim);
+    font-weight: 600;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 6px 10px;
+    border-bottom: 1px solid var(--fg-muted);
+}
+.article-section tbody td {
+    padding: 5px 10px;
+    color: var(--fg-dim);
+    border-bottom: 1px solid rgba(85,85,85,0.2);
+}
+.article-section tbody td:first-child { color: var(--fg); font-weight: 500; }
+.article-section tbody tr:last-child td { border-bottom: none; }
+.article-section .val-good { color: var(--green); }
+.article-section .val-warn { color: var(--orange); }
+.article-section .val-bad { color: var(--red); }
+
+/* Code blocks in article */
+.article-section code {
+    background: var(--bg-alt);
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-size: 0.85em;
+    color: var(--accent);
+}
+.article-section pre {
+    background: var(--bg-alt);
+    border: 1px solid var(--fg-muted);
+    border-radius: 4px;
+    padding: 14px 16px;
+    overflow-x: auto;
+    font-size: 0.8rem;
+    line-height: 1.6;
+    margin: 1rem 0;
+    color: var(--fg-dim);
+}
+.article-section pre code {
+    background: none;
+    padding: 0;
+    color: inherit;
+}
+</style>
+</head>
+<body>
+    <main style="max-width:none; padding:0;">
+
+        <!-- Breadcrumb at article width -->
+        <div class="article-section" style="padding-top:3rem;">
+            <nav class="breadcrumb">
+                <a href="../index.html">~</a>
+                <span class="sep">/</span>
+                <a href="../index.html#thoughts">thoughts</a>
+                <span class="sep">/</span>
+                <span class="current">lepong</span>
+            </nav>
+        </div>
+
+        <!-- ================================================================
+             GAME SECTION (wider than article)
+             ================================================================ -->
+        <div class="game-section">
+
+            <div class="game-header">
+                <div class="game-title">
+                    lepong
+                    <small>13M-param CNN JEPA playing pong in your browser via ONNX Runtime Web (~50 MB model)</small>
+                </div>
+                <div class="game-meta">
+                    <div>model <span class="val" id="hud-model">loading...</span></div>
+                    <div>inference <span class="val" id="hud-infer">-- ms</span></div>
+                    <div>occlusion <span class="val amber" id="hud-occ">0%</span></div>
+                </div>
+            </div>
+
+            <div class="canvas-wrap">
+                <div class="game-loading" id="loading">
+                    <div class="spinner"></div>
+                    <div>loading ONNX model (~50 MB)...</div>
+                    <div class="status" id="load-status">initializing</div>
+                </div>
+                <canvas id="gameCanvas" width="860" height="516"></canvas>
+            </div>
+
+            <div class="hud">
+                <div class="controls">
+                    <span>mouse</span> = paddle
+                    <kbd>q</kbd><kbd>w</kbd><kbd>e</kbd><kbd>r</kbd> = occ 0/20/40/60%
+                </div>
+                <div class="metrics-live">
+                    <span><span class="k">jepa err</span> <span class="v" id="hud-err">--%</span></span>
+                    <span><span class="k">score</span> <span class="v amber" id="hud-score">0 : 0</span></span>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ================================================================
+             ARTICLE SECTION (standard width)
+             ================================================================ -->
+        <div class="article-section">
+            <hr>
+            <article>
+                <header class="post-header">
+                    <h1>lepong: a world model plays pong in the browser</h1>
+                    <p class="meta">2026.04 &middot; 8 min</p>
+                </header>
+
+                <div class="content">
+
+<!-- TL;DR -->
+<h2>tl;dr</h2>
+<p>
+    A 13M-parameter CNN JEPA with a frozen backbone and a 1,930-parameter
+    <code>Linear(192, 10)</code> state head runs right here in your browser via
+    ONNX Runtime Web -- ~50 MB model, no server, no GPU.
+    Trained on 30K Pong frames, it decodes ball position at 2.45% median error
+    and plays interactively at ~6 Hz inference.
+    Under occlusion (toggle with <code>q/w/e/r</code> above) the baseline model
+    collapses -- we fixed it with data augmentation.
+    A pretrained DINOv2 with zero Pong training handles occlusion 4--7x better
+    at the embedding level, but loses at the task because it has no predictor.
+    Robustness is not task precision.
+</p>
+
+<!-- What this demo is -->
+<h2>what this demo is</h2>
+<p>
+    The model running above is a real neural network.
+    4-layer CNN encoder, 6-layer Transformer predictor, Linear state head.
+    It takes 3 frames of 128x128 pixel history, predicts the next latent state,
+    and reads off <code>ball_y</code> to move the left paddle toward the predicted
+    intercept. No simulator, no physics cheats -- just pixels in, paddle target out.
+</p>
+<p>
+    The entire 13M-parameter model was exported to ONNX and runs client-side in
+    your browser via WebAssembly. On a laptop this takes 15--40 ms per inference
+    at ~6 Hz. The game physics run at ~60 fps on the main thread; every 5th tick,
+    the current frame is captured onto a 128x128 offscreen canvas that exactly
+    replicates <code>PongWorld.render()</code> from the Python training code, then
+    fed through the network.
+</p>
+<p>
+    The left paddle (cyan label, "JEPA") is controlled entirely by the network's
+    predicted <code>ball_y</code>. The right paddle (amber, "YOU") is your mouse.
+    A faint cyan ghost ball shows where the JEPA thinks the ball is right now.
+    When the ball approaches your side and the JEPA has a prediction, a glowing
+    target zone appears -- match your paddle to the zone for a precision rating.
+</p>
+
+<!-- The obliteration story -->
+<h2>the obliteration</h2>
+<p>
+    We built a v1 in early April 2026 and shipped it as a "world model demo".
+    Then we re-read our own code and found twenty flaws.
+    The server re-rendered from state the client already sent -- a round-trip
+    decoder pretending to be a world model.
+    The encoder was labeled "frozen" in every document but
+    <code>requires_grad_(False)</code> was never called in the training script.
+    The "CEM planner" was literally <code>argmin(abs(candidate - paddle_y))</code>.
+    The A/B test was rigged: both paddles ran the same trivial tracker.
+</p>
+<p>
+    We wrote an obliteration post-mortem in the research journal, burned the v1
+    labels, and rebuilt v2 from scratch: client renders pixels, server only sees
+    PNG bytes, encoder genuinely frozen with asserted <code>requires_grad</code>
+    checks, classical extrapolator computed alongside for honest comparison.
+    The demo above is the v2 architecture, now running entirely client-side.
+</p>
+
+<!-- Three OOD axes -->
+<h2>three OOD axes</h2>
+<p>
+    We evaluated out-of-distribution robustness along three axes, adapting the
+    <code>stable-worldmodel</code> protocol from Galilai Group
+    (the standard used by DINO-WM, la-leWM, and LeWM papers).
+</p>
+<table>
+    <thead>
+        <tr>
+            <th>OOD axis</th>
+            <th>method</th>
+            <th>result</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>renderer shift</td>
+            <td>byte-compare client JS vs Python render</td>
+            <td class="val-good">99.9% identical (no shift)</td>
+        </tr>
+        <tr>
+            <td>state trajectory</td>
+            <td>SWM controller on novel trajectories</td>
+            <td class="val-warn">99.3% in-dist, 88.7% OOD</td>
+        </tr>
+        <tr>
+            <td>pixel occlusion</td>
+            <td>right-side blackout 0%/20%/40%/60%</td>
+            <td class="val-bad">state head collapses at 40%+</td>
+        </tr>
+    </tbody>
+</table>
+<p>
+    The renderer shift axis is trivially passed because the JS canvas render is
+    a line-by-line port of the Python <code>PongWorld.render()</code>. State
+    trajectory shift shows a real but modest drop: the controller trained on
+    AI-vs-AI rallies degrades when facing human play patterns. Pixel occlusion
+    is where it gets interesting.
+</p>
+
+<!-- The augmentation fix -->
+<h2>the augmentation fix</h2>
+<p>
+    Pixel occlusion at 40% meant the state head saw embeddings it had never
+    encountered during training, and its predictions went haywire.
+    The fix was simple: regenerate the training data with random right-side
+    blackout applied during collection. 30K frames with occlusion drawn uniformly
+    from 0--60%. Retrain only the 1,930-parameter state head (backbone stays frozen).
+</p>
+<table>
+    <thead>
+        <tr>
+            <th>metric</th>
+            <th>before augmentation</th>
+            <th>after augmentation</th>
+            <th>change</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>ball_x error @ 40% occ</td>
+            <td>high (unusable)</td>
+            <td>moderate</td>
+            <td class="val-good">-58%</td>
+        </tr>
+        <tr>
+            <td>SWM controller success</td>
+            <td>46.2%</td>
+            <td>62.5%</td>
+            <td class="val-good">+35%</td>
+        </tr>
+        <tr>
+            <td>ball_y OOD drop</td>
+            <td>+125%</td>
+            <td>+6%</td>
+            <td class="val-good">nearly eliminated</td>
+        </tr>
+    </tbody>
+</table>
+<p>
+    Surprise result: occlusion augmentation also fixed state-trajectory OOD.
+    The ball_y decoder drop on novel trajectories went from +125% to +6%.
+    Apparently, training the state head on partially-observed embeddings taught
+    it a more robust decoding of the latent space, even for fully-visible inputs
+    with unseen dynamics.
+</p>
+
+<!-- DINOv2 foil -->
+<h2>the DINOv2 foil</h2>
+<p>
+    A natural question: does a pretrained foundation model handle occlusion
+    better than our small task-specific CNN? We tested DINOv2 ViT-S/14 (21.6M
+    parameters, pretrained on LVD-142M images, zero Pong training) as a foil.
+</p>
+<table>
+    <thead>
+        <tr>
+            <th>model</th>
+            <th>cos sim @ 0% occ</th>
+            <th>cos sim @ 40% occ</th>
+            <th>drop</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>DINOv2 ViT-S/14</td>
+            <td>1.00</td>
+            <td>0.94</td>
+            <td class="val-good">-6%</td>
+        </tr>
+        <tr>
+            <td>our CNN JEPA</td>
+            <td>1.00</td>
+            <td>0.20</td>
+            <td class="val-bad">-80%</td>
+        </tr>
+    </tbody>
+</table>
+<p>
+    DINOv2 barely flinches at occlusion -- its embeddings at 40% blackout are
+    still 0.94 cosine to the clean version. Our CNN's embeddings collapse to 0.20.
+    But in live gameplay our CNN wins, because it has a <em>predictor</em>.
+    The JEPA architecture doesn't just encode the current frame: it predicts where
+    the ball <em>will be</em> at the next timestep. DINOv2 has no temporal model,
+    so even if its embeddings survive occlusion, it can only decode "where the ball
+    is now" (if visible) rather than "where it's going". The CNN aims at the future.
+</p>
+<p>
+    The lesson: robustness lives in pretrained features, but task precision needs
+    the prediction architecture. The ideal system would be DINOv2 encoder +
+    JEPA predictor + state head -- this is exactly what Facebook's
+    <code>jepa-wms</code> architecture provides, and it's what we plan to test next.
+</p>
+
+<!-- Code + reproduce -->
+<h2>reproduce</h2>
+<p>
+    The full codebase is at
+    <a href="https://github.com/SotoAlt/aura">github.com/SotoAlt/aura</a>.
+    Key files:
+</p>
+<pre><code># Training data (30K frames, AI vs AI with noise)
+python -m world_model.envs.pong_world --episodes 300 --steps 100
+
+# Train CNN JEPA + state head (RunPod L4, ~12 min, ~$0.20)
+python scripts/train_pong_state_head_frozen.py \
+    --data data/pong_v1.npz --epochs 50
+
+# Export to ONNX
+python scripts/export_onnx.py \
+    --checkpoint checkpoints/jepa_pong_statehead_frozen.pt
+
+# This page loads the ONNX from ../assets/lepong/pong_jepa.onnx
+# and runs inference entirely in the browser.</code></pre>
+<p>
+    The ONNX model is ~50 MB (13M parameters at float32). Inference runs
+    via WebAssembly in any modern browser -- no GPU, no server, no Python.
+    The game physics, rendering, and neural network all execute on the client.
+</p>
+
+<p class="footnote">
+    Built at WAWE Studio, Chile. April 2026.
+</p>
+
+                </div>
+            </article>
+
+            <footer>
+                <p class="nav-footer">
+                    <a href="../index.html">&larr; back</a>
+                </p>
+            </footer>
+        </div>
+    </main>
+
+<!-- ====================================================================
+     GAME ENGINE (inline JS)
+     ==================================================================== -->
+<script>
+(function() {
+"use strict";
+
+// ── Physics constants (match PongWorld exactly) ──
+const CW = 1.0, CH = 0.6;
+const BALL_R = 0.012;
+const PADDLE_H = 0.12, PADDLE_W = 0.015;
+const PADDLE_MARGIN = 0.03;
+const PADDLE_SPEED = 0.02;
+const BALL_SPEED_MIN = 0.015, BALL_SPEED_MAX = 0.025;
+
+// ── State ──
+const ball = { x: 0.5, y: 0.3, vx: 0, vy: 0 };
+let padL = 0.3, padR = 0.3;
+let scoreL = 0, scoreR = 0;
+let rally = 0;
+let mouseY = 0.3;
+let tick = 0;
+let occlusionFrac = 0.0;
+
+// ── ONNX state ──
+let session = null;
+let modelReady = false;
+const FRAME_HISTORY = 3;
+const MODEL_SIZE = 128;
+const frameBuffer = []; // ring of Float32Arrays, each 3*128*128
+let jepaBallX = 0.5, jepaBallY = 0.3;
+let inferMs = 0;
+
+// Denormalization constants from training
+const stateMean = [0.50225294, 0.50413674, 0.00056812, -0.00068764, 0.5044227, 0.50471973, 0.01077333, 0.00957677, 0.84432298, 0.07206500];
+const stateStd  = [0.2645401,  0.25370497, 0.8072008,  0.2817075,  0.24397211,0.24443097, 0.03348591,0.03213495,0.13426796,0.05260208];
+
+// ── Rhythm game state ──
+let targetActive = false;
+let hitFlash = 0, hitQuality = '';
+let screenShake = 0;
+let particles = [];
+let hits = 0, perfects = 0;
+let scorePause = 0;
+
+// ── Error tracking ──
+const errHistory = [];
+const ERR_WINDOW = 120;
+
+// ── Canvas setup ──
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+let W, H;
+
+// ── Offscreen 128x128 canvas for model input ──
+const offCanvas = document.createElement('canvas');
+offCanvas.width = MODEL_SIZE;
+offCanvas.height = MODEL_SIZE;
+const offCtx = offCanvas.getContext('2d', { willReadFrequently: true });
+
+function resize() {
+    const dpr = window.devicePixelRatio || 1;
+    const parentW = canvas.parentElement.clientWidth - 12; // subtract padding
+    W = parentW;
+    H = Math.round(W * (CH / CW));
+    canvas.width = Math.round(W * dpr);
+    canvas.height = Math.round(H * dpr);
+    canvas.style.width = W + 'px';
+    canvas.style.height = H + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+}
+
+// ── Court-to-pixel helpers ──
+function ts(nx, ny) { return [nx / CW * W, ny / CH * H]; }
+
+// ── Ball reset ──
+function resetBall(dir) {
+    ball.x = 0.5;
+    ball.y = CH / 2;
+    const spd = BALL_SPEED_MIN + Math.random() * (BALL_SPEED_MAX - BALL_SPEED_MIN);
+    const ang = (Math.random() - 0.5) * 0.8;
+    ball.vx = (dir || (Math.random() > 0.5 ? 1 : -1)) * spd * Math.cos(ang);
+    ball.vy = spd * Math.sin(ang);
+    rally = 0;
+    targetActive = false;
+}
+
+// ── Physics step (matches PongWorld.step) ──
+function physics() {
+    if (scorePause > 0) { scorePause--; return; }
+
+    // Move paddles
+    const halfH = PADDLE_H / 2;
+
+    // Left paddle: JEPA AI
+    if (modelReady) {
+        const target = jepaBallY;
+        const dl = Math.max(-PADDLE_SPEED, Math.min(PADDLE_SPEED, target - padL));
+        padL = Math.max(halfH, Math.min(CH - halfH, padL + dl));
+    } else {
+        // Fallback: simple tracking before model loads
+        const dl = Math.max(-PADDLE_SPEED, Math.min(PADDLE_SPEED, ball.y - padL));
+        padL = Math.max(halfH, Math.min(CH - halfH, padL + dl));
+    }
+
+    // Right paddle: player mouse
+    const dr = Math.max(-PADDLE_SPEED, Math.min(PADDLE_SPEED, mouseY - padR));
+    padR = Math.max(halfH, Math.min(CH - halfH, padR + dr));
+
+    // Move ball
+    ball.x += ball.vx;
+    ball.y += ball.vy;
+
+    // Wall bounces
+    if (ball.y - BALL_R < 0) { ball.y = BALL_R; ball.vy = Math.abs(ball.vy); }
+    if (ball.y + BALL_R > CH) { ball.y = CH - BALL_R; ball.vy = -Math.abs(ball.vy); }
+
+    // Left paddle collision
+    const lx = PADDLE_MARGIN + PADDLE_W;
+    if (ball.x - BALL_R < lx && ball.vx < 0 &&
+        Math.abs(ball.y - padL) < halfH + BALL_R) {
+        ball.x = lx + BALL_R;
+        ball.vx = Math.abs(ball.vx) * 1.02;
+        const offset = (ball.y - padL) / halfH;
+        ball.vy += offset * 0.005;
+        rally++;
+    }
+
+    // Right paddle collision + rhythm scoring
+    const rx = CW - PADDLE_MARGIN - PADDLE_W;
+    if (ball.x + BALL_R > rx && ball.vx > 0 &&
+        Math.abs(ball.y - padR) < halfH + BALL_R) {
+        ball.x = rx - BALL_R;
+        ball.vx = -Math.abs(ball.vx) * 1.02;
+        const offset = (ball.y - padR) / halfH;
+        ball.vy += offset * 0.005;
+        rally++;
+
+        // Rhythm scoring: distance of paddle to JEPA prediction
+        if (modelReady) {
+            const padDist = Math.abs(padR - jepaBallY);
+            hits++;
+            if (padDist < 0.03) {
+                perfects++; hitQuality = 'PERFECT'; hitFlash = 45; screenShake = 8;
+                spawnParticles(CW - PADDLE_MARGIN, ball.y, 20, '64,232,96');
+            } else if (padDist < 0.06) {
+                hitQuality = 'GREAT'; hitFlash = 30; screenShake = 4;
+                spawnParticles(CW - PADDLE_MARGIN, ball.y, 12, '64,232,208');
+            } else if (padDist < 0.10) {
+                hitQuality = 'OK'; hitFlash = 20;
+                spawnParticles(CW - PADDLE_MARGIN, ball.y, 6, '240,200,48');
+            } else {
+                hitQuality = 'MISS'; hitFlash = 15;
+            }
+        }
+        targetActive = false;
+    }
+
+    // Scoring
+    let scored = false;
+    if (ball.x < 0) { scoreR++; scored = true; resetBall(1); scorePause = 60; }
+    if (ball.x > CW) { scoreL++; scored = true; resetBall(-1); scorePause = 60; }
+
+    // Cap speed
+    const spd = Math.sqrt(ball.vx * ball.vx + ball.vy * ball.vy);
+    if (spd > BALL_SPEED_MAX * 1.5) {
+        const s = BALL_SPEED_MAX * 1.5 / spd;
+        ball.vx *= s;
+        ball.vy *= s;
+    }
+
+    // Target zone logic
+    if (ball.vx > 0 && ball.x > 0.3) targetActive = true;
+    if (ball.vx <= 0) targetActive = false;
+}
+
+// ── Particles ──
+function spawnParticles(x, y, count, rgb) {
+    for (let i = 0; i < count; i++) {
+        const ang = Math.random() * Math.PI * 2;
+        const spd = 0.002 + Math.random() * 0.008;
+        particles.push({ x, y, vx: Math.cos(ang) * spd, vy: Math.sin(ang) * spd, life: 1, rgb });
+    }
+}
+function updateParticles() {
+    for (let i = particles.length - 1; i >= 0; i--) {
+        const p = particles[i];
+        p.x += p.vx; p.y += p.vy; p.life -= 0.025;
+        if (p.life <= 0) particles.splice(i, 1);
+    }
+}
+
+// ── Error tracking ──
+function trackError() {
+    if (!modelReady) return;
+    const ey = Math.abs(jepaBallY - ball.y) / CH;
+    errHistory.push(ey);
+    if (errHistory.length > ERR_WINDOW) errHistory.shift();
+}
+function getMedianErr() {
+    if (errHistory.length < 5) return null;
+    const sorted = [...errHistory].sort((a, b) => a - b);
+    return sorted[Math.floor(sorted.length / 2)];
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// OFFSCREEN RENDER — must match PongWorld.render() exactly
+// size=128, h=76, y_off=26
+// ══════════════════════════════════════════════════════════════════════
+function renderModelInput() {
+    const S = MODEL_SIZE; // 128
+    const h = Math.floor(S * CH / CW); // 76
+    const yOff = Math.floor((S - h) / 2); // 26
+
+    // Black background
+    offCtx.fillStyle = 'rgb(0,0,0)';
+    offCtx.fillRect(0, 0, S, S);
+
+    // Court background: (20,20,30)
+    offCtx.fillStyle = 'rgb(20,20,30)';
+    offCtx.fillRect(0, yOff, S, h);
+
+    // Center line (dashed): (60,60,70) at cx=64, every 6px draw 3px high, 2px wide
+    offCtx.fillStyle = 'rgb(60,60,70)';
+    const cx = Math.floor(S / 2); // 64
+    for (let y = yOff; y < yOff + h; y += 6) {
+        offCtx.fillRect(cx - 1, y, 2, 3);
+    }
+
+    // Top/bottom borders: (100,100,110) 2px thick
+    offCtx.fillStyle = 'rgb(100,100,110)';
+    offCtx.fillRect(0, yOff, S, 2);
+    offCtx.fillRect(0, yOff + h - 2, S, 2);
+
+    // Helper: normalized coords to pixel
+    function toPx(nx, ny) {
+        return [Math.floor(nx * S), yOff + Math.floor(ny * h / CH)];
+    }
+
+    // Paddles: (200,200,220)
+    function drawPaddle(pxX, centerY) {
+        const pw = Math.max(2, Math.floor(PADDLE_W * S)); // max(2, 1) = 2
+        const ph = Math.max(4, Math.floor(PADDLE_H * h / CH)); // max(4, 15) = 15
+        const py = yOff + Math.floor(centerY * h / CH) - Math.floor(ph / 2);
+        const x0 = Math.max(0, pxX - Math.floor(pw / 2));
+        const x1 = Math.min(S, pxX + Math.floor(pw / 2));
+        const y0 = Math.max(yOff, py);
+        const y1 = Math.min(yOff + h, py + ph);
+        offCtx.fillStyle = 'rgb(200,200,220)';
+        offCtx.fillRect(x0, y0, x1 - x0, y1 - y0);
+    }
+
+    const leftPx = Math.floor(PADDLE_MARGIN * S); // 3
+    const rightPx = Math.floor((CW - PADDLE_MARGIN) * S); // 124
+    drawPaddle(leftPx, padL);
+    drawPaddle(rightPx, padR);
+
+    // Ball: (240,240,255), circle with radius max(2, int(0.012*128))=2
+    const [bx, by] = toPx(ball.x, ball.y);
+    const br = Math.max(2, Math.floor(BALL_R * S)); // 2
+    offCtx.fillStyle = 'rgb(240,240,255)';
+    // Draw filled circle pixel-by-pixel to match Python's integer rasterization
+    for (let dy = -br; dy <= br; dy++) {
+        for (let dx = -br; dx <= br; dx++) {
+            if (dx * dx + dy * dy <= br * br) {
+                const px = bx + dx, py2 = by + dy;
+                if (px >= 0 && px < S && py2 >= 0 && py2 < S) {
+                    offCtx.fillRect(px, py2, 1, 1);
+                }
+            }
+        }
+    }
+
+    // Score dots: (150,150,160)
+    offCtx.fillStyle = 'rgb(150,150,160)';
+    const sy = yOff + 8;
+    let sx = Math.floor(S / 4); // 32
+    for (let i = 0; i < Math.min(scoreL, 5); i++) {
+        offCtx.fillRect(sx + i * 5, sy, 3, 3);
+    }
+    sx = Math.floor(3 * S / 4); // 96
+    for (let i = 0; i < Math.min(scoreR, 5); i++) {
+        offCtx.fillRect(sx + i * 5, sy, 3, 3);
+    }
+
+    // Apply occlusion: black out right portion
+    if (occlusionFrac > 0) {
+        const occStartX = Math.floor(S * (1.0 - occlusionFrac));
+        offCtx.fillStyle = 'rgb(0,0,0)';
+        offCtx.fillRect(occStartX, 0, S - occStartX, S);
+    }
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// ONNX INFERENCE
+// ══════════════════════════════════════════════════════════════════════
+function captureFrame() {
+    renderModelInput();
+    const imageData = offCtx.getImageData(0, 0, MODEL_SIZE, MODEL_SIZE);
+    const data = imageData.data; // RGBA uint8
+    // Convert to Float32 CHW normalized [0,1]
+    const chw = new Float32Array(3 * MODEL_SIZE * MODEL_SIZE);
+    for (let y = 0; y < MODEL_SIZE; y++) {
+        for (let x = 0; x < MODEL_SIZE; x++) {
+            const idx = (y * MODEL_SIZE + x) * 4;
+            const pos = y * MODEL_SIZE + x;
+            chw[0 * MODEL_SIZE * MODEL_SIZE + pos] = data[idx] / 255.0;     // R
+            chw[1 * MODEL_SIZE * MODEL_SIZE + pos] = data[idx + 1] / 255.0; // G
+            chw[2 * MODEL_SIZE * MODEL_SIZE + pos] = data[idx + 2] / 255.0; // B
+        }
+    }
+    return chw;
+}
+
+function pushFrame(chw) {
+    frameBuffer.push(chw);
+    if (frameBuffer.length > FRAME_HISTORY) frameBuffer.shift();
+}
+
+async function runInference() {
+    if (!session || frameBuffer.length < FRAME_HISTORY) return;
+
+    // Build input tensor: [1, 3, 3, 128, 128] = (batch, history, channels, H, W)
+    const total = FRAME_HISTORY * 3 * MODEL_SIZE * MODEL_SIZE;
+    const inputData = new Float32Array(total);
+    for (let t = 0; t < FRAME_HISTORY; t++) {
+        const frame = frameBuffer[t];
+        const offset = t * 3 * MODEL_SIZE * MODEL_SIZE;
+        inputData.set(frame, offset);
+    }
+
+    const inputTensor = new ort.Tensor('float32', inputData, [1, FRAME_HISTORY, 3, MODEL_SIZE, MODEL_SIZE]);
+
+    const t0 = performance.now();
+    try {
+        const results = await session.run({ frames: inputTensor });
+        inferMs = performance.now() - t0;
+
+        // Read state_pred output
+        const pred = results.state_pred.data;
+        // Denormalize
+        const state = new Array(10);
+        for (let i = 0; i < 10; i++) {
+            state[i] = pred[i] * stateStd[i] + stateMean[i];
+        }
+
+        // state[0] = ball_x (normalized 0..1, multiply by CW)
+        // state[1] = ball_y (normalized 0..1, multiply by CH)
+        jepaBallX = state[0] * CW;
+        jepaBallY = state[1] * CH;
+
+    } catch (e) {
+        console.error('ONNX inference error:', e);
+    }
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// DISPLAY RENDER (the pretty one the player sees)
+// ══════════════════════════════════════════════════════════════════════
+function draw() {
+    ctx.save();
+
+    // Screen shake
+    if (screenShake > 0) {
+        const sx = (Math.random() - 0.5) * screenShake;
+        const sy = (Math.random() - 0.5) * screenShake;
+        ctx.translate(sx, sy);
+        screenShake *= 0.85;
+        if (screenShake < 0.5) screenShake = 0;
+    }
+
+    // Background
+    ctx.fillStyle = '#08080c';
+    ctx.fillRect(-5, -5, W + 10, H + 10);
+
+    // Ambient glow
+    const cg = ctx.createRadialGradient(W / 2, H / 2, 0, W / 2, H / 2, W * 0.45);
+    cg.addColorStop(0, 'rgba(240,160,48,0.012)');
+    cg.addColorStop(1, 'transparent');
+    ctx.fillStyle = cg;
+    ctx.fillRect(0, 0, W, H);
+
+    // Court border
+    ctx.strokeStyle = 'rgba(240,160,48,0.06)';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(1, 1, W - 2, H - 2);
+
+    // Center line
+    ctx.setLineDash([3, 8]);
+    ctx.strokeStyle = 'rgba(240,160,48,0.04)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(W / 2, 0);
+    ctx.lineTo(W / 2, H);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // ── Score at top ──
+    ctx.textAlign = 'center';
+    ctx.font = 'bold 28px "SF Mono", "JetBrains Mono", "Fira Code", monospace';
+    ctx.fillStyle = 'rgba(64,232,208,0.7)';
+    ctx.fillText(scoreL, W / 2 - 40, 36);
+    ctx.fillStyle = 'rgba(255,255,255,0.15)';
+    ctx.fillText(':', W / 2, 36);
+    ctx.fillStyle = 'rgba(240,160,48,0.7)';
+    ctx.fillText(scoreR, W / 2 + 40, 36);
+    ctx.font = '9px "SF Mono", monospace';
+    ctx.fillStyle = 'rgba(64,232,208,0.35)';
+    ctx.fillText('JEPA', W / 2 - 40, 50);
+    ctx.fillStyle = 'rgba(240,160,48,0.35)';
+    ctx.fillText('YOU', W / 2 + 40, 50);
+
+    // ── Occlusion overlay (player still sees game, but purple tint shows AI blind zone) ──
+    if (occlusionFrac > 0) {
+        const occStartX = W * (1.0 - occlusionFrac);
+        ctx.fillStyle = 'rgba(192,112,224,0.08)';
+        ctx.fillRect(occStartX, 0, W - occStartX, H);
+        ctx.strokeStyle = 'rgba(192,112,224,0.25)';
+        ctx.lineWidth = 1;
+        ctx.setLineDash([4, 4]);
+        ctx.beginPath();
+        ctx.moveTo(occStartX, 0);
+        ctx.lineTo(occStartX, H);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        // Label
+        ctx.fillStyle = 'rgba(192,112,224,0.4)';
+        ctx.font = '9px "SF Mono", monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText('blind to jepa', occStartX + (W - occStartX) / 2, H / 2);
+    }
+
+    // ── Ghost ball (JEPA prediction) ──
+    if (modelReady) {
+        const [gx, gy] = ts(jepaBallX, jepaBallY);
+        const gr = BALL_R / CW * W;
+        // Outer glow
+        ctx.beginPath();
+        ctx.arc(gx, gy, gr + 6, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(64,232,208,0.06)';
+        ctx.fill();
+        // Core
+        ctx.beginPath();
+        ctx.arc(gx, gy, gr + 1, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(64,232,208,0.25)';
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(64,232,208,0.5)';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+    }
+
+    // ── Target zone (rhythm game) ──
+    if (targetActive && modelReady && ball.vx > 0) {
+        const urgency = Math.max(0, Math.min(1, (ball.x - 0.2) / 0.7));
+        const pulse = 0.5 + 0.5 * Math.sin(Date.now() * 0.008);
+        const alpha = (0.06 + urgency * 0.2) * pulse;
+
+        const [, zoneTopY] = ts(0, jepaBallY - PADDLE_H * 0.7);
+        const zoneH = PADDLE_H * 1.4 / CH * H;
+        const zoneX = ts(CW - PADDLE_MARGIN - PADDLE_W * 3, 0)[0];
+        const zoneW = PADDLE_W * 6 / CW * W;
+
+        // Glow zone
+        ctx.fillStyle = `rgba(64,232,208,${alpha})`;
+        ctx.fillRect(zoneX, zoneTopY, zoneW, zoneH);
+        ctx.strokeStyle = `rgba(64,232,208,${0.3 + urgency * 0.5})`;
+        ctx.lineWidth = 2;
+        ctx.strokeRect(zoneX, zoneTopY, zoneW, zoneH);
+
+        // Crosshair
+        const zcx = zoneX + zoneW / 2, zcy = zoneTopY + zoneH / 2;
+        ctx.strokeStyle = `rgba(64,232,208,${0.2 + urgency * 0.3})`;
+        ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(zcx - 8, zcy); ctx.lineTo(zcx + 8, zcy); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(zcx, zcy - 8); ctx.lineTo(zcx, zcy + 8); ctx.stroke();
+
+        // Label
+        ctx.fillStyle = `rgba(64,232,208,${urgency * 0.7})`;
+        ctx.font = 'bold 9px "SF Mono", monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText('JEPA TARGET', zoneX + zoneW / 2, zoneTopY - 5);
+    }
+
+    // ── Left paddle (JEPA AI — cyan tint) ──
+    {
+        const [px, py] = ts(PADDLE_MARGIN + PADDLE_W / 2, padL - PADDLE_H / 2);
+        const pw = PADDLE_W / CW * W, ph = PADDLE_H / CH * H;
+        ctx.fillStyle = 'rgba(64,232,208,0.6)';
+        ctx.shadowColor = '#40e8d0';
+        ctx.shadowBlur = 8;
+        ctx.fillRect(px - pw / 2, py, pw, ph);
+        ctx.shadowBlur = 0;
+        ctx.fillStyle = 'rgba(64,232,208,0.35)';
+        ctx.font = '7px "SF Mono", monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText('JEPA', px, py - 3);
+    }
+
+    // ── Right paddle (player — amber) ──
+    {
+        const [px, py] = ts(CW - PADDLE_MARGIN - PADDLE_W / 2, padR - PADDLE_H / 2);
+        const pw = PADDLE_W / CW * W, ph = PADDLE_H / CH * H;
+        ctx.fillStyle = 'rgba(240,160,48,0.85)';
+        ctx.shadowColor = '#f0a030';
+        ctx.shadowBlur = 8;
+        ctx.fillRect(px - pw / 2, py, pw, ph);
+        ctx.shadowBlur = 0;
+        ctx.fillStyle = 'rgba(240,160,48,0.4)';
+        ctx.font = '7px "SF Mono", monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText('YOU', px, py - 3);
+    }
+
+    // ── Ball ──
+    if (scorePause <= 0) {
+        const [bx, by] = ts(ball.x, ball.y);
+        const br = BALL_R / CW * W;
+        ctx.beginPath();
+        ctx.arc(bx, by, br, 0, Math.PI * 2);
+        ctx.fillStyle = '#f0a030';
+        ctx.shadowColor = '#f0a030';
+        ctx.shadowBlur = 12;
+        ctx.fill();
+        ctx.shadowBlur = 0;
+    }
+
+    // ── Particles ──
+    updateParticles();
+    for (const p of particles) {
+        const [px, py] = ts(p.x, p.y);
+        ctx.beginPath();
+        ctx.arc(px, py, 2 + p.life * 3, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(${p.rgb},${p.life * 0.8})`;
+        ctx.fill();
+    }
+
+    // ── Hit flash ──
+    if (hitFlash > 0) {
+        hitFlash--;
+        const colors = { PERFECT: '64,232,96', GREAT: '64,232,208', OK: '240,200,48', MISS: '255,64,96' };
+        const rgb = colors[hitQuality] || colors.OK;
+        ctx.fillStyle = `rgba(${rgb},${hitFlash / 45 * 0.1})`;
+        ctx.fillRect(0, 0, W, H);
+
+        ctx.fillStyle = `rgba(${rgb},0.9)`;
+        ctx.font = 'bold 28px "SF Mono", monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText(hitQuality, W / 2, H / 2 - 5);
+        const msgs = {
+            PERFECT: 'matched JEPA prediction!',
+            GREAT: 'close to prediction!',
+            OK: 'not bad',
+            MISS: 'JEPA was elsewhere...'
+        };
+        ctx.font = '11px "SF Mono", monospace';
+        ctx.fillStyle = `rgba(${rgb},0.6)`;
+        ctx.fillText(msgs[hitQuality] || '', W / 2, H / 2 + 16);
+    }
+
+    // Score pause overlay
+    if (scorePause > 0) {
+        const fade = Math.min(1, scorePause / 40);
+        ctx.fillStyle = `rgba(0,0,0,${0.3 * fade})`;
+        ctx.fillRect(0, 0, W, H);
+        ctx.fillStyle = `rgba(240,160,48,${0.8 * fade})`;
+        ctx.font = 'bold 24px "SF Mono", monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText('GOAL', W / 2, H / 2 - 10);
+        ctx.font = '12px "SF Mono", monospace';
+        ctx.fillStyle = `rgba(240,160,48,${0.5 * fade})`;
+        ctx.fillText(`${scoreL} : ${scoreR}`, W / 2, H / 2 + 12);
+    }
+
+    // ── CRT scanlines ──
+    ctx.fillStyle = 'rgba(0,0,0,0.04)';
+    for (let y = 0; y < H; y += 2) {
+        ctx.fillRect(0, y, W, 1);
+    }
+
+    ctx.restore();
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// HUD UPDATES
+// ══════════════════════════════════════════════════════════════════════
+function updateHud() {
+    document.getElementById('hud-score').textContent = scoreL + ' : ' + scoreR;
+    if (modelReady) {
+        document.getElementById('hud-infer').textContent = inferMs.toFixed(0) + ' ms';
+    }
+    const med = getMedianErr();
+    if (med !== null) {
+        document.getElementById('hud-err').textContent = (med * 100).toFixed(1) + '%';
+    }
+    document.getElementById('hud-occ').textContent = Math.round(occlusionFrac * 100) + '%';
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// MAIN LOOP
+// ══════════════════════════════════════════════════════════════════════
+let inferPending = false;
+
+function gameLoop() {
+    physics();
+    trackError();
+    tick++;
+
+    // Every 5 ticks (~6Hz at 30fps, or ~12Hz at 60fps), capture + infer
+    if (tick % 5 === 0 && modelReady && !inferPending) {
+        const frame = captureFrame();
+        pushFrame(frame);
+        if (frameBuffer.length >= FRAME_HISTORY) {
+            inferPending = true;
+            runInference().then(() => { inferPending = false; });
+        }
+    }
+
+    if (tick % 15 === 0) updateHud();
+    draw();
+    requestAnimationFrame(gameLoop);
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// INPUT
+// ══════════════════════════════════════════════════════════════════════
+canvas.addEventListener('mousemove', function(e) {
+    const r = canvas.getBoundingClientRect();
+    mouseY = Math.max(0, Math.min(CH, ((e.clientY - r.top) / r.height) * CH));
+});
+canvas.addEventListener('touchmove', function(e) {
+    e.preventDefault();
+    const r = canvas.getBoundingClientRect();
+    const touch = e.touches[0];
+    mouseY = Math.max(0, Math.min(CH, ((touch.clientY - r.top) / r.height) * CH));
+}, { passive: false });
+
+document.addEventListener('keydown', function(e) {
+    const key = e.key.toLowerCase();
+    if (key === 'q') setOcclusion(0);
+    else if (key === 'w') setOcclusion(0.2);
+    else if (key === 'e') setOcclusion(0.4);
+    else if (key === 'r') setOcclusion(0.6);
+});
+
+function setOcclusion(frac) {
+    occlusionFrac = frac;
+    errHistory.length = 0; // reset error tracking on occlusion change
+    document.getElementById('hud-occ').textContent = Math.round(frac * 100) + '%';
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// MODEL LOADING
+// ══════════════════════════════════════════════════════════════════════
+async function loadModel() {
+    const statusEl = document.getElementById('load-status');
+    const loadingEl = document.getElementById('loading');
+
+    try {
+        statusEl.textContent = 'configuring ONNX runtime...';
+
+        // Configure ONNX Runtime for WASM
+        ort.env.wasm.numThreads = 1;
+        // Disable WASM SIMD proxy for broad compatibility
+        ort.env.wasm.proxy = false;
+
+        statusEl.textContent = 'downloading model (~50 MB)...';
+
+        // Fetch model as ArrayBuffer to avoid onnxruntime-web external data issues
+        const response = await fetch('../assets/lepong/pong_jepa.onnx');
+        if (!response.ok) throw new Error('Failed to fetch model: ' + response.status);
+        const contentLength = response.headers.get('content-length');
+        const total = contentLength ? parseInt(contentLength) : 0;
+
+        // Stream with progress if possible
+        let modelBuffer;
+        if (response.body && total > 0) {
+            const reader = response.body.getReader();
+            const chunks = [];
+            let received = 0;
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+                chunks.push(value);
+                received += value.length;
+                const pct = Math.round(received / total * 100);
+                statusEl.textContent = 'downloading... ' + pct + '% (' + (received / 1024 / 1024).toFixed(1) + ' MB)';
+            }
+            const full = new Uint8Array(received);
+            let offset = 0;
+            for (const chunk of chunks) {
+                full.set(chunk, offset);
+                offset += chunk.length;
+            }
+            modelBuffer = full.buffer;
+        } else {
+            modelBuffer = await response.arrayBuffer();
+        }
+
+        statusEl.textContent = 'creating session...';
+
+        const opts = {
+            executionProviders: ['wasm'],
+            graphOptimizationLevel: 'all'
+        };
+
+        session = await ort.InferenceSession.create(modelBuffer, opts);
+
+        statusEl.textContent = 'warming up...';
+
+        // Warm-up inference with dummy data
+        const dummyData = new Float32Array(FRAME_HISTORY * 3 * MODEL_SIZE * MODEL_SIZE);
+        const dummyTensor = new ort.Tensor('float32', dummyData, [1, FRAME_HISTORY, 3, MODEL_SIZE, MODEL_SIZE]);
+        await session.run({ frames: dummyTensor });
+
+        modelReady = true;
+        loadingEl.classList.add('hidden');
+        document.getElementById('hud-model').textContent = 'ready (50 MB)';
+        document.getElementById('hud-model').classList.remove('off');
+
+    } catch (e) {
+        console.error('Model load failed:', e);
+        statusEl.textContent = 'failed: ' + e.message;
+        document.getElementById('hud-model').textContent = 'failed';
+        document.getElementById('hud-model').classList.add('off');
+        // Still let the game run without AI
+        loadingEl.classList.add('hidden');
+    }
+}
+
+// ── Init ──
+resize();
+window.addEventListener('resize', resize);
+resetBall();
+
+// Seed the frame buffer with a few empty frames so inference can start sooner
+for (let i = 0; i < FRAME_HISTORY; i++) {
+    pushFrame(new Float32Array(3 * MODEL_SIZE * MODEL_SIZE));
+}
+
+loadModel();
+gameLoop();
+
+})();
+</script>
+</body>
+</html>
