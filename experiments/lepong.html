@@ -318,7 +318,10 @@
     gap: 12px;
     overflow-x: auto;
     padding-bottom: 8px;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
   }
+  .related-items::-webkit-scrollbar { display: none; }
   .related-item {
     flex: 0 0 auto;
     background: var(--bg-2);
@@ -517,27 +520,6 @@
 
   </div>
 
-  <div class="related">
-    <h3>more from sotoalt</h3>
-    <div class="related-items">
-      <a class="related-item" href="../thoughts/ideas-as-living-organisms.html">
-        <div class="ri-date">2026.03</div>
-        <div class="ri-title">ideas as living organisms</div>
-        <div class="ri-desc">what if ideas evolve like biological life?</div>
-      </a>
-      <a class="related-item" href="https://autogen.waweapps.win" target="_blank">
-        <div class="ri-date">2026.04</div>
-        <div class="ri-title">autogen</div>
-        <div class="ri-desc">browser-native artificial life powered by local AI</div>
-      </a>
-      <a class="related-item" href="https://github.com/SotoAlt/aura" target="_blank">
-        <div class="ri-date">repo</div>
-        <div class="ri-title">aura</div>
-        <div class="ri-desc">research journal, training scripts, full code</div>
-      </a>
-    </div>
-  </div>
-
   <footer>
     <div>lepong · april 2026 · <a href="../index.html" style="color:var(--ink-dim);">sotoalt.dev</a></div>
   </footer>
@@ -716,7 +698,7 @@ function moveTowards(cur, tgt, factor) {
 }
 
 function physics() {
-  if (scorePause > 0) { scorePause--; return; }
+  if (scorePause > 0) scorePause--;
   // Human paddle
   padR = moveTowards(padR, mouseY, 1.0);
 
@@ -1257,6 +1239,31 @@ updateLoadBar();
     Code and research journal at <a href="https://github.com/SotoAlt/aura" style="color:#4fe8d6">github.com/SotoAlt/aura</a>.
   </p>
 </section>
+
+<div class="related">
+  <h3>more from sotoalt</h3>
+  <div class="related-items">
+    <a class="related-item" href="../thoughts/ideas-as-living-organisms.html">
+      <div class="ri-date">2026.03</div>
+      <div class="ri-title">ideas as living organisms</div>
+      <div class="ri-desc">what if ideas evolve like biological life?</div>
+    </a>
+    <a class="related-item" href="https://autogen.waweapps.win" target="_blank">
+      <div class="ri-date">2026.04</div>
+      <div class="ri-title">autogen</div>
+      <div class="ri-desc">browser-native artificial life powered by local AI</div>
+    </a>
+    <a class="related-item" href="https://github.com/SotoAlt/aura" target="_blank">
+      <div class="ri-date">repo</div>
+      <div class="ri-title">aura</div>
+      <div class="ri-desc">research journal, training scripts, full code</div>
+    </a>
+  </div>
+</div>
+
+<footer style="max-width:680px;margin:0 auto;padding:20px 24px 40px;font-family:'JetBrains Mono',monospace;font-size:11px;color:#4b4e63;text-align:center;">
+  lepong · april 2026 · <a href="../index.html" style="color:#7a7e92;">sotoalt.dev</a>
+</footer>
 
 </body>
 </html>
