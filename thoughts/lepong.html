@@ -6,7 +6,6 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/onnxruntime-web@1.21.0/dist/ort.min.js"></script>
 <style>
   :root {
     --bg: #0a0a12;
@@ -114,34 +113,10 @@
     border-radius: 4px;
     padding: 14px;
   }
-  .score-display {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 18px;
-    padding: 10px 0 14px;
-    font-size: 32px;
-    font-weight: 800;
-    letter-spacing: 0.02em;
-  }
-  .score-display .jepa { color: var(--cyan); }
-  .score-display .sep { color: var(--ink-low); font-weight: 400; font-size: 24px; }
-  .score-display .you { color: var(--amber); }
-  .score-display .label {
-    font-size: 9px;
-    text-transform: uppercase;
-    letter-spacing: 0.15em;
-    color: var(--ink-low);
-    font-weight: 500;
-  }
-  .score-display .score-col {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 2px;
-  }
   canvas#c {
     width: 100%;
+    height: auto;
+    aspect-ratio: 5 / 3;
     display: block;
     image-rendering: pixelated;
     border: 1px solid var(--line-2);
@@ -205,6 +180,44 @@
   .score .you { color: var(--amber); }
   .score .jepa { color: var(--cyan); }
 
+  .score-display {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+    padding: 10px 0 14px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .score-display .score-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+  }
+  .score-display .label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--ink-low);
+  }
+  .score-display .jepa {
+    font-size: 36px;
+    font-weight: 800;
+    color: var(--cyan);
+    line-height: 1;
+  }
+  .score-display .you {
+    font-size: 36px;
+    font-weight: 800;
+    color: var(--amber);
+    line-height: 1;
+  }
+  .score-display .sep {
+    font-size: 14px;
+    color: var(--ink-low);
+    font-weight: 400;
+  }
+
   /* Explainer cards under the game */
   .explainer {
     margin-top: 30px;
@@ -258,34 +271,6 @@
   }
   footer a { color: var(--amber); text-decoration: none; }
   footer a:hover { text-decoration: underline; }
-
-  /* Article section */
-  .article {
-    margin-top: 48px;
-    padding-top: 32px;
-    border-top: 1px solid var(--line);
-    max-width: 680px;
-    font-size: 13px;
-    line-height: 1.7;
-    color: var(--ink-dim);
-  }
-  .article h2 {
-    color: var(--ink);
-    font-size: 16px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    margin-bottom: 14px;
-  }
-  .article p { margin-bottom: 12px; }
-  .article a { color: var(--amber); text-decoration: none; }
-  .article a:hover { text-decoration: underline; }
-  .article strong { color: var(--ink); font-weight: 500; }
-  .article .studio {
-    margin-top: 20px;
-    font-size: 11px;
-    color: var(--ink-low);
-  }
 </style>
 </head>
 <body>
@@ -294,33 +279,27 @@
 
   <header>
     <div>
-      <div class="mark"><span class="bracket">[</span>le<span class="accent">pong</span><span class="bracket">]</span> jepa plays pong</div>
-      <div class="tag"><strong>In-browser world-model demo.</strong> A 13M-parameter JEPA runs entirely in your browser via ONNX. It sees only pixels from a 128x128 canvas — no ball state, no server. Right 40% of the court can be blackened so the model must imagine the ball in the hidden region. <strong>Compare JEPA against a trivial classical extrapolator.</strong></div>
+      <div class="mark"><span class="bracket">[</span><span class="accent">lepong</span><span class="bracket">]</span> pixel-input jepa</div>
+      <div class="tag"><strong>Honest world-model demo.</strong> Client renders canvas → sends PNG bytes. Server only sees pixels: no ball state, no re-rendering. Right 40% of the court is blackened before sending, so the model must imagine the ball in the hidden region. <strong>Compare JEPA against a trivial classical extrapolator and honestly report whichever wins.</strong></div>
     </div>
     <div class="meta">
-      <div><span class="k">model</span> <span class="v" id="meta-server">loading...</span><span class="status-dot off" id="dot-status"></span></div>
+      <div><span class="k">server</span> <span class="v" id="meta-server">connecting…</span><span class="status-dot off" id="dot-status"></span></div>
       <div><span class="k">mode</span> <span class="v" id="meta-mode">jepa</span></div>
-      <div><span class="k">frames</span> <span class="v" id="meta-frames">0</span></div>
+      <div><span class="k">frames logged</span> <span class="v" id="meta-frames">0</span></div>
     </div>
   </header>
 
   <div class="honest">
-    <strong>What this is.</strong> The client draws the Pong game on a canvas, blackens the right 40%, and runs the frame through a <strong>13M-parameter CNN JEPA</strong> exported to ONNX — entirely in your browser, no server. The frozen encoder + 6-layer transformer predictor reads <code>ball_y</code> from a trained <code>Linear(192, 10)</code> state head and uses that as the paddle target. A classical extrapolator <code>ball.y + 5*ball.vy</code> is computed alongside for comparison — if it beats JEPA, the demo honestly reports that. See <a href="https://github.com/SotoAlt/aura">the research journal</a> for the full story.
+    <strong>What this is.</strong> The client draws the Pong game on a canvas, blackens the right 40%, PNG-encodes it, and sends bytes to the server. The server encodes the PNG through a <strong>genuinely frozen</strong> CNN encoder + 6-layer transformer predictor, reads <code>ball_y</code> from a trained <code>Linear(192, 10)</code> state head, and sends that value back as the paddle target. A classical extrapolator <code>ball.y + 5·ball.vy</code> is computed alongside for comparison — if it beats JEPA, the demo is honest about that and the blog reports the negative result. See <code>docs/RESEARCH_JOURNAL.md</code> April 8 (night) for the full story of how we got here.
   </div>
 
   <div class="game">
 
     <div class="canvas-wrap">
       <div class="score-display">
-        <div class="score-col">
-          <span class="label">jepa</span>
-          <span class="jepa" id="score-top-l">0</span>
-        </div>
+        <div class="score-col"><span class="label">JEPA</span><span class="jepa" id="score-top-l">0</span></div>
         <span class="sep">vs</span>
-        <div class="score-col">
-          <span class="label">you</span>
-          <span class="you" id="score-top-r">0</span>
-        </div>
+        <div class="score-col"><span class="label">YOU</span><span class="you" id="score-top-r">0</span></div>
       </div>
       <canvas id="c" width="900" height="540"></canvas>
     </div>
@@ -330,17 +309,14 @@
       <div class="section">
         <div class="section-title">ai paddle mode</div>
         <div class="modes">
-          <button id="mode-jepa" class="active" onclick="setMode('jepa')">
+          <button id="mode-jepa" class="active" onclick="setMode('jepa')" title="JEPA neural network predicts ball position from pixels and drives the paddle">
             JEPA <span class="k">1</span>
           </button>
-          <button id="mode-classical" onclick="setMode('classical')">
+          <button id="mode-classical" onclick="setMode('classical')" title="Oracle baseline — uses ground truth state + 5-step physics integration (unfair advantage)">
             CLASSICAL <span class="k">2</span>
           </button>
-          <button id="mode-reactive" onclick="setMode('reactive')">
+          <button id="mode-reactive" onclick="setMode('reactive')" title="Naive tracker — paddle follows current ball.y with no prediction">
             REACTIVE <span class="k">3</span>
-          </button>
-          <button id="mode-off" onclick="setMode('off')">
-            OFF <span class="k">4</span>
           </button>
         </div>
       </div>
@@ -348,16 +324,16 @@
       <div class="section">
         <div class="section-title">occlusion</div>
         <div class="modes">
-          <button id="occ-0" class="active" onclick="setOcclusion(0.0)">
+          <button id="occ-0" class="active" onclick="setOcclusion(0.0)" title="Model sees the full court — training distribution">
             0 % <span class="k">q</span>
           </button>
-          <button id="occ-20" onclick="setOcclusion(0.2)">
+          <button id="occ-20" onclick="setOcclusion(0.2)" title="Right 20% of the model's input is blacked out">
             20 % <span class="k">w</span>
           </button>
-          <button id="occ-40" onclick="setOcclusion(0.4)">
+          <button id="occ-40" onclick="setOcclusion(0.4)" title="Right 40% blacked out — baseline model collapses here">
             40 % <span class="k">e</span>
           </button>
-          <button id="occ-60" onclick="setOcclusion(0.6)">
+          <button id="occ-60" onclick="setOcclusion(0.6)" title="Right 60% blacked out — extreme occlusion test">
             60 % <span class="k">r</span>
           </button>
         </div>
@@ -402,7 +378,7 @@
         <div class="metrics">
           <div class="k">rally</div><div class="v" id="m-rally">0</div>
           <div class="k">plan time</div><div class="v" id="m-plan">— ms</div>
-          <div class="k">infer rtt</div><div class="v" id="m-rtt">— ms</div>
+          <div class="k">ws rtt</div><div class="v" id="m-rtt">— ms</div>
           <div class="k">history</div><div class="v" id="m-hist">—</div>
         </div>
       </div>
@@ -414,25 +390,27 @@
 
     <div class="card">
       <span class="num">pipeline · pixels in</span>
-      <h3>canvas → ONNX → JEPA</h3>
+      <h3>canvas → PNG → JEPA</h3>
       <p>
         Every 5 physics ticks (≈6 Hz) the client draws the Pong game on an
-        <strong>offscreen 128x128 canvas</strong> whose JS render function is a line-by-line
+        <strong>offscreen 128×128 canvas</strong> whose JS render function is a line-by-line
         reimplementation of <code>PongWorld.render()</code>
         (<code>world_model/envs/pong_world.py:155</code>). If the occlusion slider above is
         non-zero, the client also blanks out a vertical strip on the right side of that
-        canvas with <code>fillRect</code> before encoding. The frame is then passed directly
-        to the ONNX runtime running in your browser — no server round-trip.
+        canvas with <code>fillRect</code> before encoding. Then <code>toDataURL('image/png')</code>
+        and ship the base64 bytes over WebSocket to <code>/ws-pong-v2</code>.
       </p>
       <p>
-        The model is a 13M-parameter CNN JEPA with a frozen encoder + predictor and a
-        trained <code>Linear(192, 10)</code> state head. It receives 3 stacked frames as
-        input and predicts normalized ball/paddle state. The paddle target comes exclusively
-        from <code>state_head(predictor(encoder(frames)))[ball_y]</code>. Trainable parameters:
-        1,930 (just the state head). Frozen parameters: 13,082,080.
+        The server <em>does</em> receive a <code>ground_truth</code> field in every message —
+        it uses it only for the classical baseline computation and for the per-tick verify log,
+        never as model input. The paddle target comes exclusively from
+        <code>state_head(predictor(encoder(client_png)))[ball_y]</code>. Trainable parameters:
+        1,930 (just the Linear(192, 10) state head). Frozen parameters: 13,082,080 (encoder +
+        predictor + projectors), with <code>requires_grad_(False)</code> asserted at load time.
       </p>
       <p><strong>Sanity check</strong>: if the model stopped running, the paddle would freeze
-      immediately (JEPA mode has no fallback).</p>
+      immediately (JEPA mode has no fallback). Open <code>/health</code> to see a full
+      <code>state_usage</code> breakdown.</p>
     </div>
 
     <div class="card">
@@ -454,7 +432,8 @@
       <p>
         This is an A/B dial: flip between 0% and 40% and watch whether the JEPA cyan ball
         still sits on top of the white real ball, and whether the median error in the
-        <strong>live ball_y error</strong> panel climbs.
+        <strong>live ball_y error</strong> panel climbs. The verify log tags every frame with
+        its <code>occlusion_frac</code> so a later analysis can slice metrics by occlusion.
       </p>
     </div>
 
@@ -464,12 +443,13 @@
       <p>
         Running <strong>p50 / p95 / max</strong> absolute error of JEPA's prediction and the
         classical baseline vs ground truth, separately for <code>ball_y</code> and
-        <code>ball_x</code>. All computation happens in-browser — no server logging.
+        <code>ball_x</code>. Every server tick is logged to <code>/tmp/pong_v2_verify.jsonl</code>
+        — no sampling, no filter. These are the numbers the blog cites.
       </p>
       <p>
         The classical baseline is NOT a fair comparison — it has direct access to
         ground-truth state and integrates physics (walls + no paddle lookahead) for 5 steps
-        from that state. JEPA has only the pixel bytes. When classical wins on median it's
+        from that state. JEPA has only the PNG bytes. When classical wins on median it's
         because it's an oracle, not because the baseline is smart. The interesting questions
         are: (a) how close does JEPA get despite having less information? (b) does JEPA's
         tail (p95, max) degrade gracefully or catastrophically? (c) does occlusion break JEPA?
@@ -484,8 +464,9 @@
   </div>
 
   <footer>
-    <div>lepong · aura project · april 2026 · in-browser JEPA demo</div>
+    <div>pong-v2 · aura project · april 2026 · honest world-model demo</div>
     <div>
+      <a href="/health" target="_blank">/health</a> ·
       <a href="https://github.com/SotoAlt/aura" target="_blank">repo</a>
     </div>
   </footer>
@@ -493,6 +474,11 @@
 </div>
 
 <script>
+// For local testing: ws://localhost:8791/ws-pong-v2
+// For production: change to deployed server URL
+const WS_URL = (location.protocol === 'https:' ? 'wss://' : 'ws://') +
+  (location.hostname === 'sotoalt.dev' ? 'lepong-server.fly.dev' : location.host) + '/ws-pong-v2';
+
 // ============================================================================
 // PONG V2 CLIENT
 //
@@ -518,13 +504,13 @@ const canvas = document.getElementById('c');
 const ctx = canvas.getContext('2d');
 let W = canvas.width, H = canvas.height;
 
-// Offscreen 128x128 canvas for what the model sees
+// Offscreen 128x128 canvas for what the server sees
 const enc = document.createElement('canvas');
 enc.width = ENCODE_SIZE;
 enc.height = ENCODE_SIZE;
 const ectx = enc.getContext('2d');
 
-// Game state (the CLIENT knows all of this; the model sees only pixels)
+// Game state (the CLIENT knows all of this; the server sees only pixels)
 let ball = { x: 0.5, y: 0.3, vx: 0.02, vy: 0.004 };
 let padL = COURT_H / 2;
 let padR = COURT_H / 2;
@@ -532,11 +518,11 @@ let scoreL = 0, scoreR = 0;
 let rally = 0;
 let mouseY = COURT_H / 2;
 
-// Model responses
+// Server responses
 let aiPaddleTarget = null;         // JEPA's predicted ball_y
-let jepaPred = null;               // full {ball_x, ball_y}
-let classicalBaselineBallY = null; // classical y prediction
-let classicalBaselineBallX = null; // classical x prediction
+let jepaPred = null;               // full {ball_x, ball_y, ball_vx, ball_vy}
+let classicalBaselineBallY = null; // server-echoed classical y prediction
+let classicalBaselineBallX = null; // server-echoed classical x prediction
 let historyReady = false;
 let metricPlanMs = null;
 let metricRtt = null;
@@ -565,7 +551,8 @@ function clampTgt(y) { return Math.max(PAD_Y_MIN, Math.min(PAD_Y_MAX, y)); }
 let mode = 'jepa';  // 'jepa' | 'classical' | 'reactive' | 'off'
 
 // ============================================================================
-// PONG PHYSICS  (classical client-side; the model never sees these floats)
+// PONG PHYSICS  (classical client-side; the server never sees these floats
+// except as ground_truth telemetry that it deliberately ignores for prediction)
 // ============================================================================
 function resetBall(dir) {
   ball.x = 0.5;
@@ -575,7 +562,7 @@ function resetBall(dir) {
   ball.vx = (dir || (Math.random() > 0.5 ? 1 : -1)) * speed * Math.cos(angle);
   ball.vy = speed * Math.sin(angle);
   rally = 0;
-  historyReady = false;  // history will need to re-warm
+  historyReady = false;  // server history will need to re-warm
 }
 
 function physicsStep() {
@@ -663,7 +650,7 @@ function physics() {
 
 // ============================================================================
 // OFFSCREEN RENDER — must match world_model/envs/pong_world.py:render()
-// exactly, so the encoder sees the same distribution it was trained
+// exactly, so the server's encoder sees the same distribution it was trained
 // on. Any divergence here silently breaks the whole demo.
 // ============================================================================
 function renderOffscreen() {
@@ -833,8 +820,8 @@ function displayRender() {
   }
 
   // Classical baseline ball (amber ring). Uses the 2D prediction
-  // (ball.x + 5*ball.vx, ball.y + 5*ball.vy with wall folding) computed
-  // locally, so the ring is drawn at the actual predicted position,
+  // (ball.x + 5*ball.vx, ball.y + 5*ball.vy with wall folding) sent by
+  // the server, so the ring is drawn at the actual predicted position,
   // not at the stale current ball.x.
   if (classicalBaselineBallY !== null) {
     const bx = classicalBaselineBallX !== null ? classicalBaselineBallX : ball.x;
@@ -930,9 +917,9 @@ function setMode(m) {
 }
 
 // Occlusion toggle — switches how much of the right side of the encoded
-// 128x128 canvas gets blacked out before being passed to the model.
-// Also resets all error buffers so the live metrics reflect ONLY the
-// new occlusion level, not the mix from before.
+// 128x128 canvas gets blacked out before being PNG-encoded and shipped
+// to the server. Also resets all error buffers so the live metrics
+// reflect ONLY the new occlusion level, not the mix from before.
 function setOcclusion(frac) {
   OCCLUSION_FRAC = frac;
   const pctStr = Math.round(frac * 100).toString();
@@ -949,167 +936,117 @@ function setOcclusion(frac) {
 }
 
 // ============================================================================
-// ONNX INFERENCE (replaces WebSocket)
+// WEBSOCKET
 // ============================================================================
-let onnxSession = null;
-let onnxLoading = true;
-let frameHistory = []; // 3-frame buffer of Float32Arrays
+let ws = null;
+let wsOpen = false;
 let framesSent = 0;
 
-// These are the exact values from checkpoints/jepa_pong_statehead_occ_aug.pt
-const STATE_MEAN = [0.50225294, 0.50413674, 0.00056812, -0.00068764, 0.5044227, 0.50471973, 0.0, 0.0, 0.84, 0.0];
-const STATE_STD = [0.2645401, 0.25370497, 0.8072008, 0.2817075, 0.24397211, 0.24443097, 0.01, 0.01, 0.15, 0.01];
+function connectWS() {
+  const url = WS_URL;
+  ws = new WebSocket(url);
 
-async function loadModel() {
-  try {
-    document.getElementById('meta-server').textContent = 'loading model...';
-    const response = await fetch('../assets/lepong/pong_jepa.onnx');
-    const buffer = await response.arrayBuffer();
-    onnxSession = await ort.InferenceSession.create(buffer);
-    onnxLoading = false;
-    document.getElementById('meta-server').textContent = 'onnx ready';
+  ws.onopen = () => {
+    wsOpen = true;
+    document.getElementById('meta-server').textContent = 'connected';
     document.getElementById('dot-status').classList.remove('off');
-    console.log('ONNX model loaded');
-  } catch (e) {
-    console.error('Failed to load ONNX model:', e);
-    document.getElementById('meta-server').textContent = 'model error';
-  }
-}
+  };
+  ws.onclose = () => {
+    wsOpen = false;
+    document.getElementById('meta-server').textContent = 'disconnected';
+    document.getElementById('dot-status').classList.add('off');
+    setTimeout(connectWS, 1000);
+  };
+  ws.onerror = (e) => console.error('ws error', e);
 
-function canvasToFloat32(canvas) {
-  // Convert 128x128 canvas to Float32Array in CHW format normalized to [0,1]
-  const ctx = canvas.getContext('2d');
-  const imageData = ctx.getImageData(0, 0, 128, 128);
-  const data = imageData.data; // RGBA uint8
-  const chw = new Float32Array(3 * 128 * 128);
-  for (let y = 0; y < 128; y++) {
-    for (let x = 0; x < 128; x++) {
-      const srcIdx = (y * 128 + x) * 4;
-      const dstIdx = y * 128 + x;
-      chw[0 * 128 * 128 + dstIdx] = data[srcIdx] / 255.0;     // R
-      chw[1 * 128 * 128 + dstIdx] = data[srcIdx + 1] / 255.0; // G
-      chw[2 * 128 * 128 + dstIdx] = data[srcIdx + 2] / 255.0; // B
+  ws.onmessage = (ev) => {
+    const msg = JSON.parse(ev.data);
+    if (msg.error) {
+      console.error('server error:', msg.error);
+      return;
     }
-  }
-  return chw;
-}
+    metricRtt = performance.now() - lastWsSend;
+    document.getElementById('m-rtt').textContent = Math.round(metricRtt) + ' ms';
 
-async function runInference() {
-  if (!onnxSession || onnxLoading) return;
-
-  const t0 = performance.now();
-
-  // Get current frame from offscreen canvas
-  const frame = canvasToFloat32(enc);
-
-  // Push to history, keep last 3
-  frameHistory.push(frame);
-  while (frameHistory.length > 3) frameHistory.shift();
-
-  // Pad history if less than 3 frames
-  while (frameHistory.length < 3) {
-    frameHistory.unshift(frameHistory[0]);
-  }
-
-  // Build input tensor: [1, 3, 3, 128, 128]
-  const inputData = new Float32Array(1 * 3 * 3 * 128 * 128);
-  for (let t = 0; t < 3; t++) {
-    const src = frameHistory[t];
-    inputData.set(src, t * 3 * 128 * 128);
-  }
-
-  const inputTensor = new ort.Tensor('float32', inputData, [1, 3, 3, 128, 128]);
-
-  try {
-    const results = await onnxSession.run({ frames: inputTensor });
-    const statePred = results.state_pred.data; // Float32Array of 10
-
-    // Denormalize
-    const state = new Float32Array(10);
-    for (let i = 0; i < 10; i++) {
-      state[i] = statePred[i] * STATE_STD[i] + STATE_MEAN[i];
-    }
-
-    const predBallX = state[0]; // normalized [0,1] → multiply by COURT_W for court coords
-    const predBallY = state[1]; // normalized [0,1] → multiply by COURT_H for court coords
-
-    // Set AI paddle target (same as ws.onmessage did)
-    aiPaddleTarget = predBallY * COURT_H;
-
-    // Set JEPA prediction for visualization
-    jepaPred = {
-      ball_x: predBallX * COURT_W,
-      ball_y: predBallY * COURT_H,
-    };
-
-    // Measure error against previous prediction
-    if (pendingJepaPredY !== null) {
+    // === Measure the PREVIOUS prediction against the CURRENT real ball ===
+    // Separate buffers for ball_y and ball_x, and separate buffers for JEPA
+    // and classical. The live panel shows p50/p95/max for all four.
+    if (pendingJepaPredY !== null && ball.y !== undefined) {
       const err = Math.abs(pendingJepaPredY - ball.y);
       jepaErrs.push(err);
       if (jepaErrs.length > 1000) jepaErrs.shift();
     }
-    if (pendingJepaPredX !== null) {
+    if (pendingJepaPredX !== null && ball.x !== undefined) {
       const err = Math.abs(pendingJepaPredX - ball.x);
       jepaXErrs.push(err);
       if (jepaXErrs.length > 1000) jepaXErrs.shift();
     }
-
-    pendingJepaPredY = predBallY * COURT_H;
-    pendingJepaPredX = predBallX * COURT_W;
-
-    // Compute classical baseline locally (5-step physics integration)
-    const BALL_R_CONST = 0.012;
-    let bx = ball.x, by = ball.y, bvx = ball.vx, bvy = ball.vy;
-    for (let s = 0; s < 5; s++) {
-      bx += bvx; by += bvy;
-      if (by - BALL_R_CONST < 0) { by = BALL_R_CONST; bvy = Math.abs(bvy); }
-      if (by + BALL_R_CONST > COURT_H) { by = COURT_H - BALL_R_CONST; bvy = -Math.abs(bvy); }
-    }
-
-    if (pendingClassicalPredY !== null) {
+    if (pendingClassicalPredY !== null && ball.y !== undefined) {
       const err = Math.abs(pendingClassicalPredY - ball.y);
       classicalErrs.push(err);
       if (classicalErrs.length > 1000) classicalErrs.shift();
     }
-    if (pendingClassicalPredX !== null) {
+    if (pendingClassicalPredX !== null && ball.x !== undefined) {
       const err = Math.abs(pendingClassicalPredX - ball.x);
       classicalXErrs.push(err);
       if (classicalXErrs.length > 1000) classicalXErrs.shift();
     }
 
-    classicalBaselineBallY = by;
-    classicalBaselineBallX = bx;
-    pendingClassicalPredY = by;
-    pendingClassicalPredX = bx;
-
-    historyReady = frameHistory.length >= 3;
+    // Store the NEW predictions to be checked on the next tick
+    if (msg.ai_paddle_y !== null && msg.ai_paddle_y !== undefined) {
+      aiPaddleTarget = msg.ai_paddle_y;
+      pendingJepaPredY = msg.ai_paddle_y;
+    }
+    if (msg.jepa_pred !== null && msg.jepa_pred !== undefined) {
+      jepaPred = msg.jepa_pred;
+      pendingJepaPredX = msg.jepa_pred.ball_x;
+    }
+    if (msg.classical_baseline_ball_y !== null && msg.classical_baseline_ball_y !== undefined) {
+      classicalBaselineBallY = msg.classical_baseline_ball_y;
+      pendingClassicalPredY = msg.classical_baseline_ball_y;
+    }
+    if (msg.classical_baseline_ball_x !== null && msg.classical_baseline_ball_x !== undefined) {
+      classicalBaselineBallX = msg.classical_baseline_ball_x;
+      pendingClassicalPredX = msg.classical_baseline_ball_x;
+    }
+    historyReady = !!msg.history_ready;
     document.getElementById('m-hist').textContent = historyReady ? 'ready' : 'warming';
-
-    const inferMs = performance.now() - t0;
-    document.getElementById('m-plan').textContent = inferMs.toFixed(1) + ' ms';
-    document.getElementById('m-rtt').textContent = inferMs.toFixed(0) + ' ms';
+    if (msg.plan_ms_avg !== null && msg.plan_ms_avg !== undefined) {
+      document.getElementById('m-plan').textContent = msg.plan_ms_avg.toFixed(1) + ' ms';
+    }
 
     updateMetrics();
-    framesSent++;
-    document.getElementById('meta-frames').textContent = framesSent;
-
-  } catch (e) {
-    console.error('Inference error:', e);
-  }
+  };
 }
 
 // ============================================================================
-// PHYSICS TICK + ONNX INFERENCE
+// PHYSICS TICK + WS SEND
 // ============================================================================
 let physicsTick = 0;
 setInterval(() => {
   physics();
   physicsTick++;
 
-  // Run ONNX inference every 5 physics ticks = ~6 Hz
-  if (physicsTick % 5 === 0 && !onnxLoading) {
+  // Send every 5 physics ticks = ~6 Hz
+  if (physicsTick % 5 === 0 && wsOpen) {
     renderOffscreen();
-    runInference();
+    const png = enc.toDataURL('image/png');
+    const payload = {
+      frame_png: png,
+      occlusion_frac: OCCLUSION_FRAC,  // logged per-tick so verify.jsonl can slice by occ
+      ground_truth: {
+        ball_x: ball.x,
+        ball_y: ball.y,
+        ball_vx: ball.vx,
+        ball_vy: ball.vy,
+        pad_l: padL,
+        pad_r: padR,
+      },
+    };
+    lastWsSend = performance.now();
+    ws.send(JSON.stringify(payload));
+    framesSent++;
+    document.getElementById('meta-frames').textContent = framesSent;
   }
 }, 33);  // 30 Hz physics
 
@@ -1147,24 +1084,21 @@ document.addEventListener('keydown', (e) => {
 // BOOT
 // ============================================================================
 resetBall();
-loadModel();
+connectWS();
 draw();
 </script>
 
-<section class="article">
-  <div class="wrap">
-    <h2>TL;DR</h2>
-    <p>
-      A <strong>13M-parameter JEPA</strong> (CNN encoder + 6-layer transformer predictor + linear state head) plays Pong from raw pixels, running entirely in your browser via ONNX. It receives 128x128 frames, predicts ball position through a trained state head, and drives the left paddle. No server, no simulator, no game state — just pixels in, paddle target out.
-    </p>
-    <p>
-      The occlusion slider is the interesting part: at 0% the model sees everything and the task is trivial. At 40% the right side of the court is blacked out before the model sees it, forcing genuine prediction under partial observability. The live error panels show whether the JEPA or a classical physics extrapolator (which cheats by reading ground-truth state) does better.
-    </p>
-    <p>
-      Full research journal, training recipes, and the obliteration post-mortem of the v1 demo are at <a href="https://github.com/SotoAlt/aura">github.com/SotoAlt/aura</a>.
-    </p>
-    <p class="studio">WAWE Studio, Chile — April 2026</p>
-  </div>
+<section style="max-width: 680px; margin: 40px auto 0; padding: 0 24px 60px; font-family: 'JetBrains Mono', monospace; color: #7a7e92; font-size: 13px; line-height: 1.7;">
+  <h2 style="color: #d8dae5; font-size: 16px; margin-bottom: 12px;">about this demo</h2>
+  <p>
+    A <strong style="color:#d8dae5">13M-parameter CNN JEPA</strong> with a frozen backbone and a 1930-parameter Linear state head, trained on 30K Pong frames. It takes 3 frames of pixel history, runs a 6-layer transformer predictor, and reads <code style="color:#4fe8d6">ball_y</code> from the state head to drive the left paddle. No simulator, no game state — just pixels in, paddle target out.
+  </p>
+  <p style="margin-top:12px">
+    Toggle occlusion with <strong style="color:#d8dae5">q/w/e/r</strong> to see how the model handles partial observability. At 40%, the baseline model collapses — we fixed it with data augmentation (retraining only the state head on occluded frames, encoder stays frozen).
+  </p>
+  <p style="margin-top:12px">
+    Full research journal and code at <a href="https://github.com/SotoAlt/aura" style="color:#4fe8d6">github.com/SotoAlt/aura</a>.
+  </p>
 </section>
 
 </body>
