@@ -104,7 +104,7 @@
   /* Game layout */
   .game {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) 280px;
+    grid-template-columns: minmax(0, 1fr) 260px;
     gap: 20px;
   }
   .canvas-wrap {
@@ -115,8 +115,6 @@
   }
   canvas#c {
     width: 100%;
-    height: auto;
-    aspect-ratio: 5 / 3;
     display: block;
     image-rendering: pixelated;
     border: 1px solid var(--line-2);
@@ -128,6 +126,29 @@
     border-radius: 4px;
     padding: 18px;
     font-size: 12px;
+  }
+  .metrics-collapsible { display: none; }
+  .metrics-collapsible.open { display: block; }
+  .metrics-toggle {
+    background: var(--bg-3); border: 1px solid var(--line-2); color: var(--ink-dim);
+    font-family: inherit; font-size: 10px; padding: 4px 10px; border-radius: 3px;
+    cursor: pointer; width: 100%; margin-top: 8px; text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .metrics-toggle:hover { color: var(--cyan); border-color: var(--cyan); }
+
+  /* Mobile responsive */
+  @media (max-width: 860px) {
+    .wrap { padding: 16px 12px 48px; }
+    header { grid-template-columns: 1fr; gap: 12px; }
+    .meta { text-align: left; }
+    .game { grid-template-columns: 1fr; }
+    .panel { order: 2; }
+    .canvas-wrap { order: 1; }
+    .honest { font-size: 11px; }
+    .explainer { grid-template-columns: 1fr; }
+    .mark { font-size: 20px; }
+    .tag { font-size: 11px; }
   }
   .section { padding: 10px 0; border-bottom: 1px solid var(--line); }
   .section:first-child { padding-top: 0; }
@@ -304,7 +325,7 @@
         <button id="pause-btn" onclick="togglePause()" title="Pause/resume game" style="margin-left:16px;background:var(--bg-3);border:1px solid var(--line-2);color:var(--ink-dim);font-family:inherit;font-size:11px;padding:4px 12px;border-radius:3px;cursor:pointer;">PAUSE</button>
       </div>
       <div style="position:relative;">
-        <canvas id="c" width="900" height="540"></canvas>
+        <canvas id="c"></canvas>
         <div id="loading-overlay" style="position:absolute;inset:0;background:rgba(10,10,18,0.95);display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:4px;z-index:10;">
           <div style="font-size:24px;font-weight:800;color:var(--cyan);letter-spacing:0.05em;margin-bottom:8px;">LEPONG</div>
           <div style="color:var(--ink-dim);font-size:12px;margin-bottom:20px;">loading neural network...</div>
@@ -367,38 +388,41 @@
         </div>
       </div>
 
-      <div class="section">
-        <div class="section-title">live ball_y error</div>
-        <div class="metrics">
-          <div class="k">jepa median</div><div class="v cyan" id="m-jepa-p50">— %</div>
-          <div class="k">jepa p95</div><div class="v cyan" id="m-jepa-p95">— %</div>
-          <div class="k">jepa max</div><div class="v cyan" id="m-jepa-max">— %</div>
-          <div class="k">classical median</div><div class="v amber" id="m-cl-p50">— %</div>
-          <div class="k">classical p95</div><div class="v amber" id="m-cl-p95">— %</div>
-          <div class="k">classical max</div><div class="v amber" id="m-cl-max">— %</div>
-          <div class="k">samples</div><div class="v" id="m-n">0</div>
+      <button class="metrics-toggle" onclick="document.getElementById('metrics-detail').classList.toggle('open'); this.textContent = this.textContent === 'show metrics' ? 'hide metrics' : 'show metrics';">show metrics</button>
+      <div id="metrics-detail" class="metrics-collapsible">
+        <div class="section">
+          <div class="section-title">live ball_y error</div>
+          <div class="metrics">
+            <div class="k">jepa median</div><div class="v cyan" id="m-jepa-p50">— %</div>
+            <div class="k">jepa p95</div><div class="v cyan" id="m-jepa-p95">— %</div>
+            <div class="k">jepa max</div><div class="v cyan" id="m-jepa-max">— %</div>
+            <div class="k">classical median</div><div class="v amber" id="m-cl-p50">— %</div>
+            <div class="k">classical p95</div><div class="v amber" id="m-cl-p95">— %</div>
+            <div class="k">classical max</div><div class="v amber" id="m-cl-max">— %</div>
+            <div class="k">samples</div><div class="v" id="m-n">0</div>
+          </div>
         </div>
-      </div>
 
-      <div class="section">
-        <div class="section-title">live ball_x error</div>
-        <div class="metrics">
-          <div class="k">jepa median</div><div class="v cyan" id="m-jepax-p50">— %</div>
-          <div class="k">jepa p95</div><div class="v cyan" id="m-jepax-p95">— %</div>
-          <div class="k">jepa max</div><div class="v cyan" id="m-jepax-max">— %</div>
-          <div class="k">classical median</div><div class="v amber" id="m-clx-p50">— %</div>
-          <div class="k">classical p95</div><div class="v amber" id="m-clx-p95">— %</div>
-          <div class="k">classical max</div><div class="v amber" id="m-clx-max">— %</div>
+        <div class="section">
+          <div class="section-title">live ball_x error</div>
+          <div class="metrics">
+            <div class="k">jepa median</div><div class="v cyan" id="m-jepax-p50">— %</div>
+            <div class="k">jepa p95</div><div class="v cyan" id="m-jepax-p95">— %</div>
+            <div class="k">jepa max</div><div class="v cyan" id="m-jepax-max">— %</div>
+            <div class="k">classical median</div><div class="v amber" id="m-clx-p50">— %</div>
+            <div class="k">classical p95</div><div class="v amber" id="m-clx-p95">— %</div>
+            <div class="k">classical max</div><div class="v amber" id="m-clx-max">— %</div>
+          </div>
         </div>
-      </div>
 
-      <div class="section">
-        <div class="section-title">runtime</div>
-        <div class="metrics">
-          <div class="k">rally</div><div class="v" id="m-rally">0</div>
-          <div class="k">plan time</div><div class="v" id="m-plan">— ms</div>
-          <div class="k">ws rtt</div><div class="v" id="m-rtt">— ms</div>
-          <div class="k">history</div><div class="v" id="m-hist">—</div>
+        <div class="section">
+          <div class="section-title">runtime</div>
+          <div class="metrics">
+            <div class="k">rally</div><div class="v" id="m-rally">0</div>
+            <div class="k">plan time</div><div class="v" id="m-plan">— ms</div>
+            <div class="k">latency</div><div class="v" id="m-rtt">— ms</div>
+            <div class="k">history</div><div class="v" id="m-hist">—</div>
+          </div>
         </div>
       </div>
 
@@ -436,7 +460,6 @@
   <footer>
     <div>lepong · april 2026</div>
     <div>
-      <a href="/health" target="_blank">/health</a> ·
       <a href="https://github.com/SotoAlt/aura" target="_blank">repo</a>
     </div>
   </footer>
@@ -474,7 +497,20 @@ const ENCODE_SIZE = 128;
 // Display canvas (what the human sees — full court, not blackened)
 const canvas = document.getElementById('c');
 const ctx = canvas.getContext('2d');
-let W = canvas.width, H = canvas.height;
+let W = 900, H = 540;
+
+function resizeCanvas() {
+  const rect = canvas.parentElement.getBoundingClientRect();
+  const cw = Math.floor(rect.width);
+  const ch = Math.floor(cw * COURT_H / COURT_W);
+  canvas.width = cw;
+  canvas.height = ch;
+  canvas.style.height = ch + 'px';
+  W = cw;
+  H = ch;
+}
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
 
 // Offscreen 128x128 canvas for what the server sees
 const enc = document.createElement('canvas');
