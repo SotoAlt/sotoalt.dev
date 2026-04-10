@@ -475,9 +475,11 @@
 
 <script>
 // For local testing: ws://localhost:8791/ws-pong-v2
-// For production: change to deployed server URL
-const WS_URL = (location.protocol === 'https:' ? 'wss://' : 'ws://') +
-  (location.hostname === 'sotoalt.dev' ? 'lepong-server.fly.dev' : location.host) + '/ws-pong-v2';
+// Production: Hetzner VPS via Caddy reverse proxy (WSS)
+// Local dev: connects to localhost server directly
+const WS_URL = (location.hostname === 'sotoalt.dev')
+  ? 'wss://autogen.waweapps.win/lepong/ws-pong-v2'
+  : (location.protocol === 'https:' ? 'wss://' : 'ws://') + location.host + '/ws-pong-v2';
 
 // ============================================================================
 // PONG V2 CLIENT
