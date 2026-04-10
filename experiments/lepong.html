@@ -1061,9 +1061,9 @@ function updateLoadBar() {
   const el = document.getElementById('loading-overlay');
   if (!el) return;
   const elapsed = (Date.now() - loadStart) / 1000;
-  const pct = Math.min(100, (elapsed / 4) * 80 + (wsOpen ? 20 : 0));
+  const pct = Math.min(100, wsOpen ? 100 : (elapsed / 3) * 90);
   document.getElementById('load-bar').style.width = pct + '%';
-  if (elapsed > 4 && wsOpen) {
+  if (wsOpen || elapsed > 3) {
     el.style.opacity = '0';
     el.style.transition = 'opacity 0.5s';
     setTimeout(() => el.style.display = 'none', 500);
