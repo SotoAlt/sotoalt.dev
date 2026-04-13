@@ -1350,6 +1350,42 @@ python -m server.infer --checkpoint checkpoints/lepong_statehead_occ_aug.pt --po
     Code, model weights, and training data: <a href="https://github.com/SotoAlt/lepong" style="color:#4fe8d6">github.com/SotoAlt/lepong</a> &middot; <a href="https://huggingface.co/sotoalt/lepong" style="color:#4fe8d6">huggingface.co/sotoalt/lepong</a>
   </p>
 
+  <h2 style="color: #d8dae5; font-size: 16px; margin: 40px 0 16px; letter-spacing: 0.05em;">FAQ</h2>
+
+  <div style="display:grid;gap:16px;">
+
+    <div>
+      <p style="color:#d8dae5;margin:0 0 4px;"><strong>Isn't this just a linear probe on frozen CNN features?</strong></p>
+      <p style="margin:0;">Mostly, yes. The state head is a linear layer reading from the predictor's output. The difference from a standard probe: it reads from the <em>predictor's</em> embedding (what the model thinks comes next), not the encoder's (what the model sees now). With zero actions passed to the predictor, the margin is small. We're transparent about this.</p>
+    </div>
+
+    <div>
+      <p style="color:#d8dae5;margin:0 0 4px;"><strong>Can this model do multi-step rollout?</strong></p>
+      <p style="margin:0;">No. We tried — it collapses after 5-10 autoregressive steps (a known JEPA limitation). This is a 1-step state decoder with a predictor in the loop, not a long-horizon planner. Calling it a "world model" is technically correct (it predicts future state from observations) but it doesn't plan ahead the way you might imagine.</p>
+    </div>
+
+    <div>
+      <p style="color:#d8dae5;margin:0 0 4px;"><strong>Pong is trivial. Any CNN can learn ball position.</strong></p>
+      <p style="margin:0;">Correct. Pong was chosen because it trains in minutes on CPU. The point isn't "can a neural net play Pong" — it's the OOD analysis: what breaks, what fixes it, and why pretrained encoders help. Those findings transfer to harder domains.</p>
+    </div>
+
+    <div>
+      <p style="color:#d8dae5;margin:0 0 4px;"><strong>The DINOv2 comparison is unfair — you gave it no predictor.</strong></p>
+      <p style="margin:0;">Deliberately so. We compared our full pipeline (encoder + predictor + state head) against DINOv2 as encoder only. The fair comparison would be DINOv2 + a trained predictor on top — which is what <a href="https://arxiv.org/abs/2512.24497" style="color:#4fe8d6;">jepa-wms</a> does, and it would likely win at both robustness and task performance. The point of our test was to isolate the encoder robustness gap, not to claim our CNN is better overall.</p>
+    </div>
+
+    <div>
+      <p style="color:#d8dae5;margin:0 0 4px;"><strong>Is the "accidental fix" on trajectory OOD statistically significant?</strong></p>
+      <p style="margin:0;">The per-frame decoder result (ball_y OOD drop +125% → +6%, measured on 2000 frames) is robust. The controller result (+2.0 pts on 150 trials) is within noise. We're confident about the decoder finding, less confident about the controller number.</p>
+    </div>
+
+    <div>
+      <p style="color:#d8dae5;margin:0 0 4px;"><strong>The model passes zero actions to the predictor. Is it actually predicting?</strong></p>
+      <p style="margin:0;">The predictor receives zero-vectors for actions because we don't feed the paddle action back. So the "prediction" is mostly the predictor's learned inertia prior: "given these 3 frames, what embedding comes next." It IS adding value over raw encoder output (ball_y correlation 0.991 vs 0.966 without predictor), but the margin is small. The predictor matters more in environments with action-dependent dynamics.</p>
+    </div>
+
+  </div>
+
 </section>
 
 <div class="related">
