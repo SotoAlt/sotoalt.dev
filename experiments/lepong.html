@@ -136,7 +136,9 @@
     font-size: 11px;
     color: var(--ink-dim);
   }
-  .ball-legend .leg-item { display: flex; align-items: center; gap: 6px; }
+  .ball-legend .leg-item { display: flex; align-items: center; gap: 6px; cursor: pointer; user-select: none; }
+  .ball-legend .leg-item:hover { opacity: 1; }
+  .ball-legend .leg-item.off { opacity: 0.3; }
   .ball-legend .dot {
     width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;
   }
@@ -379,7 +381,7 @@
   <header>
     <div>
       <div class="mark"><span class="bracket">[</span><span class="accent">lepong</span><span class="bracket">]</span> pixel-input jepa</div>
-      <div class="tag"><strong>A neural network plays pong by watching pixels — no game state, no physics engine.</strong> Move your mouse to play against it.</div>
+      <div class="tag"><strong>A neural network plays pong by watching pixels — it never sees game state, only a 128x128 screenshot.</strong> Move your mouse to play against it.</div>
     </div>
     <div class="meta">
       <div><span class="k">server</span> <span class="v" id="meta-server">connecting…</span><span class="status-dot off" id="dot-status"></span></div>
@@ -405,9 +407,9 @@
       <div style="position:relative;">
         <canvas id="c"></canvas>
         <div class="ball-legend">
-          <div class="leg-item"><span class="dot dot-real"></span> real ball</div>
-          <div class="leg-item"><span class="dot dot-jepa"></span> jepa prediction</div>
-          <div class="leg-item"><span class="dot dot-classical"></span> classical oracle</div>
+          <div class="leg-item" id="tog-real" onclick="toggleBall('real')"><span class="dot dot-real"></span> real ball</div>
+          <div class="leg-item" id="tog-jepa" onclick="toggleBall('jepa')"><span class="dot dot-jepa"></span> jepa prediction</div>
+          <div class="leg-item" id="tog-classical" onclick="toggleBall('classical')"><span class="dot dot-classical"></span> classical oracle</div>
         </div>
         <div id="loading-overlay" style="position:absolute;inset:0;background:rgba(10,10,18,0.95);display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:4px;z-index:10;">
           <div style="font-size:24px;font-weight:800;color:var(--cyan);letter-spacing:0.05em;margin-bottom:8px;">LEPONG</div>
@@ -616,6 +618,14 @@ let aiPaddleTarget = null;         // JEPA's predicted ball_y
 let jepaPred = null;               // full {ball_x, ball_y, ball_vx, ball_vy}
 let classicalBaselineBallY = null; // server-echoed classical y prediction
 let classicalBaselineBallX = null; // server-echoed classical x prediction
+
+// Ball visibility toggles
+let showReal = true, showJepa = true, showClassical = true;
+function toggleBall(which) {
+  if (which === 'real') { showReal = !showReal; document.getElementById('tog-real').classList.toggle('off', !showReal); }
+  if (which === 'jepa') { showJepa = !showJepa; document.getElementById('tog-jepa').classList.toggle('off', !showJepa); }
+  if (which === 'classical') { showClassical = !showClassical; document.getElementById('tog-classical').classList.toggle('off', !showClassical); }
+}
 let historyReady = false;
 let metricPlanMs = null;
 let metricRtt = null;
@@ -914,13 +924,15 @@ function displayRender() {
 
   // Real ball (white)
   const brPx = Math.max(4, BALL_R * scale * 2);
-  ctx.fillStyle = '#f8f8ff';
-  ctx.beginPath();
-  ctx.arc(cx0 + ball.x * scale, cy0 + ball.y * scale, brPx, 0, Math.PI * 2);
-  ctx.fill();
+  if (showReal) {
+    ctx.fillStyle = '#f8f8ff';
+    ctx.beginPath();
+    ctx.arc(cx0 + ball.x * scale, cy0 + ball.y * scale, brPx, 0, Math.PI * 2);
+    ctx.fill();
+  }
 
-  // JEPA's imagined ball (cyan, only if it exists and is in the blind region)
-  if (jepaPred !== null) {
+  // JEPA's imagined ball (cyan)
+  if (showJepa && jepaPred !== null) {
     const jx = jepaPred.ball_x * scale;
     const jy = jepaPred.ball_y * scale;
     // Draw with a ring to distinguish from the real ball
@@ -939,7 +951,7 @@ function displayRender() {
   // (ball.x + 5*ball.vx, ball.y + 5*ball.vy with wall folding) sent by
   // the server, so the ring is drawn at the actual predicted position,
   // not at the stale current ball.x.
-  if (classicalBaselineBallY !== null) {
+  if (showClassical && classicalBaselineBallY !== null) {
     const bx = classicalBaselineBallX !== null ? classicalBaselineBallX : ball.x;
     const by = classicalBaselineBallY;
     ctx.strokeStyle = '#f0b056';
