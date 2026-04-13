@@ -130,21 +130,37 @@
   }
   .ball-legend {
     display: flex;
-    gap: 16px;
+    gap: 6px;
     justify-content: center;
-    padding: 8px 0 4px;
-    font-size: 11px;
+    padding: 10px 0 4px;
+  }
+  .ball-toggle {
+    display: flex; align-items: center; gap: 7px;
+    padding: 5px 12px 5px 8px;
+    border-radius: 20px;
+    border: 1px solid var(--line-2);
+    background: var(--bg-3);
+    cursor: pointer; user-select: none;
+    font-size: 11px; font-family: inherit;
     color: var(--ink-dim);
+    transition: all 0.2s ease;
   }
-  .ball-legend .leg-item { display: flex; align-items: center; gap: 6px; cursor: pointer; user-select: none; }
-  .ball-legend .leg-item:hover { opacity: 1; }
-  .ball-legend .leg-item.off { opacity: 0.3; }
-  .ball-legend .dot {
-    width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;
+  .ball-toggle:hover { border-color: var(--ink-dim); }
+  .ball-toggle .indicator {
+    width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+    transition: all 0.2s ease;
+    box-shadow: 0 0 6px currentColor;
   }
-  .ball-legend .dot-real { background: #f8f8ff; }
-  .ball-legend .dot-jepa { background: transparent; border: 2px solid #4fe8d6; }
-  .ball-legend .dot-classical { background: transparent; border: 2px dashed #f0b056; }
+  .ball-toggle[data-ball="real"] .indicator { background: #f8f8ff; box-shadow: 0 0 6px rgba(248,248,255,0.4); }
+  .ball-toggle[data-ball="jepa"] .indicator { background: #4fe8d6; box-shadow: 0 0 6px rgba(79,232,214,0.4); }
+  .ball-toggle[data-ball="classical"] .indicator { background: #f0b056; box-shadow: 0 0 6px rgba(240,176,86,0.4); }
+  /* ON state — colored border glow */
+  .ball-toggle.on[data-ball="real"] { border-color: rgba(248,248,255,0.3); color: #d8dae5; }
+  .ball-toggle.on[data-ball="jepa"] { border-color: rgba(79,232,214,0.3); color: #4fe8d6; }
+  .ball-toggle.on[data-ball="classical"] { border-color: rgba(240,176,86,0.3); color: #f0b056; }
+  /* OFF state — dimmed, no glow */
+  .ball-toggle.off { opacity: 0.35; border-color: var(--line); }
+  .ball-toggle.off .indicator { box-shadow: none; background: var(--ink-low); }
   .metrics-collapsible { display: none; }
   .metrics-collapsible.open { display: block; }
   .metrics-toggle {
@@ -407,9 +423,9 @@
       <div style="position:relative;">
         <canvas id="c"></canvas>
         <div class="ball-legend">
-          <div class="leg-item" id="tog-real" onclick="toggleBall('real')"><span class="dot dot-real"></span> real ball</div>
-          <div class="leg-item" id="tog-jepa" onclick="toggleBall('jepa')"><span class="dot dot-jepa"></span> jepa prediction</div>
-          <div class="leg-item" id="tog-classical" onclick="toggleBall('classical')"><span class="dot dot-classical"></span> classical oracle</div>
+          <button class="ball-toggle on" id="tog-real" data-ball="real" onclick="toggleBall('real')"><span class="indicator"></span>real ball</button>
+          <button class="ball-toggle on" id="tog-jepa" data-ball="jepa" onclick="toggleBall('jepa')"><span class="indicator"></span>jepa prediction</button>
+          <button class="ball-toggle on" id="tog-classical" data-ball="classical" onclick="toggleBall('classical')"><span class="indicator"></span>classical oracle</button>
         </div>
         <div id="loading-overlay" style="position:absolute;inset:0;background:rgba(10,10,18,0.95);display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:4px;z-index:10;">
           <div style="font-size:24px;font-weight:800;color:var(--cyan);letter-spacing:0.05em;margin-bottom:8px;">LEPONG</div>
@@ -622,9 +638,13 @@ let classicalBaselineBallX = null; // server-echoed classical x prediction
 // Ball visibility toggles
 let showReal = true, showJepa = true, showClassical = true;
 function toggleBall(which) {
-  if (which === 'real') { showReal = !showReal; document.getElementById('tog-real').classList.toggle('off', !showReal); }
-  if (which === 'jepa') { showJepa = !showJepa; document.getElementById('tog-jepa').classList.toggle('off', !showJepa); }
-  if (which === 'classical') { showClassical = !showClassical; document.getElementById('tog-classical').classList.toggle('off', !showClassical); }
+  const el = document.getElementById('tog-' + which);
+  if (which === 'real') showReal = !showReal;
+  if (which === 'jepa') showJepa = !showJepa;
+  if (which === 'classical') showClassical = !showClassical;
+  const isOn = which === 'real' ? showReal : which === 'jepa' ? showJepa : showClassical;
+  el.classList.toggle('on', isOn);
+  el.classList.toggle('off', !isOn);
 }
 let historyReady = false;
 let metricPlanMs = null;
