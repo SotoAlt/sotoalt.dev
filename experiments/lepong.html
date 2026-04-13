@@ -931,24 +931,30 @@ function displayRender() {
     ctx.setLineDash([]);
   }
 
-  // Ball legend (bottom-right of court)
-  const legX = cx0 + courtW - 14;
-  const legY = cy0 + courtH - 12;
+  // Ball legend (top-right corner, vertical stack)
+  const legX = cx0 + courtW - 12;
+  let legY = cy0 + 16;
+  const legSp = 16;
   ctx.textAlign = 'right';
-  ctx.font = '10px "JetBrains Mono", monospace';
+  ctx.font = 'bold 11px "JetBrains Mono", monospace';
+  // Real ball
   ctx.fillStyle = '#f8f8ff';
-  ctx.beginPath(); ctx.arc(legX - 90, legY - 2, 3, 0, Math.PI * 2); ctx.fill();
-  ctx.fillStyle = 'rgba(216,218,229,0.6)';
-  ctx.fillText('real', legX - 78, legY + 2);
-  ctx.strokeStyle = '#4fe8d6'; ctx.lineWidth = 1.5;
-  ctx.beginPath(); ctx.arc(legX - 48, legY - 2, 4, 0, Math.PI * 2); ctx.stroke();
-  ctx.fillStyle = 'rgba(79,232,214,0.6)';
-  ctx.fillText('jepa', legX - 34, legY + 2);
-  ctx.setLineDash([2, 2]); ctx.strokeStyle = '#f0b056'; ctx.lineWidth = 1.5;
-  ctx.beginPath(); ctx.arc(legX - 6, legY - 2, 5, 0, Math.PI * 2); ctx.stroke();
+  ctx.beginPath(); ctx.arc(legX - 55, legY, 4, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = '#d8dae5';
+  ctx.fillText('real ball', legX, legY + 4);
+  legY += legSp;
+  // JEPA
+  ctx.strokeStyle = '#4fe8d6'; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.arc(legX - 55, legY, 5, 0, Math.PI * 2); ctx.stroke();
+  ctx.fillStyle = '#4fe8d6';
+  ctx.fillText('jepa prediction', legX, legY + 4);
+  legY += legSp;
+  // Classical
+  ctx.setLineDash([3, 3]); ctx.strokeStyle = '#f0b056'; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.arc(legX - 55, legY, 6, 0, Math.PI * 2); ctx.stroke();
   ctx.setLineDash([]);
-  ctx.fillStyle = 'rgba(240,176,86,0.6)';
-  ctx.fillText('classical', legX + 8, legY + 2);
+  ctx.fillStyle = '#f0b056';
+  ctx.fillText('classical oracle', legX, legY + 4);
   ctx.textAlign = 'left';
 
   // Score flash overlay
