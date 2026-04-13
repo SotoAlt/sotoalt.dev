@@ -1295,14 +1295,14 @@ updateLoadBar();
   <div style="background:#11121b;border:1px solid #232538;border-radius:4px;padding:16px;margin:16px 0;font-size:11px;line-height:1.8;color:#7a7e92;">
     <div style="color:#4b4e63;margin-bottom:8px;font-size:10px;letter-spacing:0.1em;">PIPELINE</div>
     <span style="color:#d8dae5;">128x128 frame</span> <span style="color:#4b4e63;">&rarr;</span>
-    <span style="color:#4fe8d6;">CNN encoder</span> <span style="color:#4b4e63;">(frozen)</span> <span style="color:#4b4e63;">&rarr;</span>
+    <span style="color:#4fe8d6;">custom CNN encoder</span> <span style="color:#4b4e63;">(frozen, trained from scratch on Pong)</span> <span style="color:#4b4e63;">&rarr;</span>
     <span style="color:#d8dae5;">192-dim</span> <span style="color:#4b4e63;">&rarr;</span>
-    <span style="color:#4fe8d6;">6-layer transformer</span> <span style="color:#4b4e63;">(frozen)</span> <span style="color:#4b4e63;">&rarr;</span>
-    <span style="color:#f0b056;">Linear(192, 10)</span> <span style="color:#4b4e63;">&rarr;</span>
+    <span style="color:#4fe8d6;">6-layer transformer predictor</span> <span style="color:#4b4e63;">(frozen)</span> <span style="color:#4b4e63;">&rarr;</span>
+    <span style="color:#f0b056;">Linear(192, 10) state head</span> <span style="color:#4b4e63;">&rarr;</span>
     <span style="color:#d8dae5;">ball_y</span> <span style="color:#4b4e63;">&rarr;</span>
     <span style="color:#4fe8d6;">paddle</span>
-    <div style="margin-top:10px;color:#4b4e63;font-size:10px;">
-      13M total params &middot; 1,930 trainable (just the orange layer) &middot; trained on 30K frames
+    <div style="margin-top:10px;color:#6b6e83;font-size:10px;">
+      all custom-trained, no pretrained models &middot; 13M total params &middot; 1,930 trainable (just the orange state head) &middot; trained on 30K frames
     </div>
   </div>
 
@@ -1325,7 +1325,7 @@ updateLoadBar();
     </div>
     <div style="background:#11121b;border:1px solid #232538;border-radius:4px;padding:14px 16px;">
       <div style="color:#d66ff0;font-size:10px;letter-spacing:0.1em;margin-bottom:6px;">FINDING 4 — PRETRAINED ENCODERS ARE 4-7x MORE ROBUST</div>
-      <p style="margin:0">A frozen DINOv2 (zero Pong training) handles 40% occlusion at cosine similarity <strong style="color:#d8dae5;">0.94</strong> while our CNN drops to <strong style="color:#d8dae5;">0.20</strong>. But our CNN wins at the actual task because it has a trained predictor. <strong style="color:#d8dae5;">Robustness and task precision are different things.</strong></p>
+      <p style="margin:0">As a comparison, we tested swapping our custom CNN encoder for a frozen DINOv2 (Meta's pretrained model, zero Pong training). DINOv2 handles 40% occlusion at cosine <strong style="color:#d8dae5;">0.94</strong> while our CNN drops to <strong style="color:#d8dae5;">0.20</strong>. But our custom CNN + predictor wins at the actual game because it predicts ahead. <strong style="color:#d8dae5;">Robustness and task precision are different things.</strong></p>
     </div>
   </div>
 
