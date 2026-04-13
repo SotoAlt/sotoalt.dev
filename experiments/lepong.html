@@ -408,7 +408,7 @@
 
   <div class="honest">
     <strong>What is JEPA?</strong> Joint Embedding Predictive Architecture — a neural network that learns to predict the next state of a scene from pixel observations. Instead of generating future frames (like a video model), it predicts in a compressed latent space, making it fast enough to run in real time.<br><br>
-    <strong>This experiment:</strong> the left paddle is controlled entirely by a 13M-parameter JEPA. Every ~6 times per second, this page captures a 128x128 screenshot of the game, sends it to a server running the neural network, and gets back a predicted ball position. The paddle moves to that prediction. No physics engine, no game state — the model only sees pixels and must figure out where the ball is going.
+    <strong>This experiment:</strong> the left paddle is controlled entirely by a 13M-parameter JEPA. Every ~6 times per second, this page captures a 128x128 screenshot of the game, sends it to a server running the neural network, and gets back a predicted ball position. The paddle moves to that prediction. The model never receives game state or physics — it only sees the raw pixel screenshot and must figure out where the ball is going.
   </div>
 
   <div class="game">
@@ -423,9 +423,9 @@
       <div style="position:relative;">
         <canvas id="c"></canvas>
         <div class="ball-legend">
-          <button class="ball-toggle on" id="tog-real" data-ball="real" onclick="toggleBall('real')"><span class="indicator"></span>real ball</button>
-          <button class="ball-toggle on" id="tog-jepa" data-ball="jepa" onclick="toggleBall('jepa')"><span class="indicator"></span>jepa prediction</button>
-          <button class="ball-toggle on" id="tog-classical" data-ball="classical" onclick="toggleBall('classical')"><span class="indicator"></span>classical oracle</button>
+          <button class="ball-toggle on" id="tog-real" data-ball="real" onclick="toggleBall('real')" title="Toggle real ball visibility (physics engine)"><span class="indicator"></span>real ball</button>
+          <button class="ball-toggle on" id="tog-jepa" data-ball="jepa" onclick="toggleBall('jepa')" title="Toggle JEPA prediction visibility (neural network)"><span class="indicator"></span>jepa prediction</button>
+          <button class="ball-toggle on" id="tog-classical" data-ball="classical" onclick="toggleBall('classical')" title="Toggle classical oracle visibility (ground truth physics)"><span class="indicator"></span>classical oracle</button>
         </div>
         <div id="loading-overlay" style="position:absolute;inset:0;background:rgba(10,10,18,0.95);display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:4px;z-index:10;">
           <div style="font-size:24px;font-weight:800;color:var(--cyan);letter-spacing:0.05em;margin-bottom:8px;">LEPONG</div>
@@ -1288,7 +1288,7 @@ updateLoadBar();
 
   <h2 style="color: #d8dae5; font-size: 16px; margin-bottom: 16px; letter-spacing: 0.05em;">what we built</h2>
 
-  <p>The left paddle above is controlled entirely by a neural network. No physics engine, no game state — it watches pixels and decides where to move.</p>
+  <p>The left paddle above is controlled entirely by a neural network. It receives no game state — only a 128x128 pixel screenshot. From that image alone, it predicts where the ball will be and moves the paddle there.</p>
 
   <p style="margin-top:12px">The architecture is a <strong style="color:#4fe8d6">JEPA</strong> (Joint Embedding Predictive Architecture): instead of generating future video frames pixel by pixel, it predicts in a compressed latent space. This makes it fast enough to run in real time.</p>
 
