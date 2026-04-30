@@ -565,12 +565,12 @@
 </div>
 
 <script>
-// For local testing: ws://localhost:8791/ws-pong-v2
-// Production: Hetzner VPS via Caddy reverse proxy (WSS)
-// Local dev: connects to localhost server directly
+// Production: dedicated JEPA inference VPS via Caddy reverse proxy
+// (jepa.waweapps.win @ 5.78.111.179, see SotoAlt/jepa-vps-proxy).
+// Local dev: connects to the lepong server directly.
 const WS_URL = (location.hostname === 'sotoalt.dev')
-  ? 'wss://autogen.waweapps.win/lepong/ws-pong-v2'
-  : (location.protocol === 'https:' ? 'wss://' : 'ws://') + location.host + '/ws-pong-v2';
+  ? 'wss://jepa.waweapps.win/lepong/ws-pong'
+  : (location.protocol === 'https:' ? 'wss://' : 'ws://') + location.host + '/ws-pong';
 
 // ============================================================================
 // PONG V2 CLIENT
