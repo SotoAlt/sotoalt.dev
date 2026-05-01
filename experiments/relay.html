@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>relay — JEPA plans against you in latent space</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>relay — jepa plans a turn-based puzzle in latent space</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>~</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -11,12 +12,20 @@
   :root {
     --bg: #0a0a12;
     --bg-2: #11121b;
+    --bg-3: #181926;
     --line: #232538;
+    --line-2: #2e3045;
     --ink: #d8dae5;
     --ink-dim: #7a7e92;
     --ink-low: #6b6e83;
     --amber: #f0b056;
+    --amber-soft: rgba(240, 176, 86, 0.12);
+    --amber-bright: #f8c070;
     --cyan: #4fe8d6;
+    --cyan-soft: rgba(79, 232, 214, 0.12);
+    --magenta: #d66ff0;
+    --red: #ff5b6c;
+    --green: #5ce388;
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
   html, body {
@@ -38,134 +47,610 @@
     background-size: auto, auto, 60px 60px, 60px 60px;
     background-position: 0 0, 0 0, -1px -1px, -1px -1px;
   }
-  .wrap { max-width: 1100px; margin: 0 auto; padding: 28px 24px 72px; }
-  nav.crumbs {
+  .wrap { max-width: 920px; margin: 0 auto; padding: 14px 20px 72px; }
+
+  .breadcrumb {
     font-size: 11px;
     color: var(--ink-low);
+    margin-bottom: 10px;
+  }
+  .breadcrumb a { color: var(--ink-dim); text-decoration: none; }
+  .breadcrumb a:hover { color: var(--amber); }
+  .breadcrumb .sep { margin: 0 6px; color: var(--ink-low); }
+
+  header {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 18px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--line);
     margin-bottom: 14px;
   }
-  nav.crumbs a { color: var(--ink-dim); text-decoration: none; }
-  nav.crumbs a:hover { color: var(--amber); }
-  nav.crumbs .sep { margin: 0 6px; color: var(--ink-low); }
-  header.lead {
-    padding-bottom: 20px;
-    border-bottom: 1px solid var(--line);
-    margin-bottom: 24px;
-  }
-  header.lead h1 {
-    font-size: 30px;
+  .mark {
     font-weight: 800;
-    letter-spacing: -0.01em;
-    margin-bottom: 6px;
+    font-size: 18px;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    text-transform: uppercase;
   }
-  header.lead h1 .accent { color: var(--amber); }
-  header.lead h1 .bracket { color: var(--ink-low); font-weight: 400; }
-  header.lead .sub {
+  .mark .accent { color: var(--amber); }
+  .mark .bracket { color: var(--ink-low); font-weight: 400; }
+  .tag {
     color: var(--ink-dim);
-    font-size: 13px;
+    font-size: 11px;
+    line-height: 1.4;
   }
-  header.lead .sub strong { color: var(--ink); font-weight: 500; }
-  .embed-card {
+  .tag strong { color: var(--ink); font-weight: 500; }
+  .meta {
+    text-align: right;
+    font-size: 10px;
+    color: var(--ink-dim);
+    line-height: 1.6;
+    white-space: nowrap;
+  }
+  .meta .k { color: var(--ink-low); }
+  .meta .v { color: var(--amber); }
+  .meta > div { display: inline-block; margin-left: 10px; }
+  .meta .status-dot {
+    display: inline-block;
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--green);
+    margin-left: 4px;
+  }
+  .meta .status-dot.off { background: var(--red); }
+
+  .game {
+    display: grid;
+    grid-template-columns: 460px 240px;
+    gap: 16px;
+    justify-content: center;
+    align-items: stretch;
+  }
+  .canvas-wrap {
     background: var(--bg-2);
     border: 1px solid var(--line);
     border-radius: 4px;
-    padding: 0;
-    overflow: hidden;
-    margin-bottom: 24px;
+    padding: 12px;
+    width: 460px;
   }
-  .embed-card iframe {
-    display: block;
-    width: 100%;
-    height: 1700px;
-    border: 0;
-    background: var(--bg);
-  }
-  .embed-fallback {
-    text-align: center;
-    padding: 40px 20px;
-    color: var(--ink-dim);
-    font-size: 12px;
-  }
-  .embed-fallback a {
-    color: var(--amber);
-    text-decoration: none;
-    border-bottom: 1px dotted var(--amber);
-  }
-  .meta {
+  .score-display {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
-    gap: 12px;
-    margin-bottom: 24px;
+    gap: 8px;
+    padding: 0 0 10px;
   }
-  .meta .cell {
-    background: var(--bg-2);
+  .score-card {
+    background: var(--bg-3);
     border: 1px solid var(--line);
-    border-radius: 4px;
-    padding: 10px 14px;
+    border-radius: 3px;
+    padding: 6px 8px;
+    text-align: center;
   }
-  .meta .k {
+  .score-card .label {
     font-size: 9px;
     text-transform: uppercase;
-    letter-spacing: 0.14em;
+    letter-spacing: 0.12em;
     color: var(--ink-low);
-    margin-bottom: 3px;
   }
-  .meta .v {
-    color: var(--ink);
+  .score-card .val { font-size: 22px; font-weight: 800; line-height: 1.1; margin-top: 2px; }
+  .score-card .val.you { color: var(--amber); }
+  .score-card .val.jepa { color: var(--cyan); }
+  .score-card .val.next { color: var(--amber); font-size: 16px; padding-top: 4px; }
+
+  .howto {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: center;
+    gap: 12px;
+    padding: 9px 12px;
+    margin-bottom: 10px;
+    background: rgba(240, 176, 86, 0.04);
+    border: 1px solid rgba(240, 176, 86, 0.22);
+    border-radius: 3px;
+    font-size: 11px;
+    line-height: 1.45;
+    color: var(--ink-dim);
+  }
+  .howto-pill {
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    color: var(--amber);
+    background: rgba(240, 176, 86, 0.1);
+    padding: 4px 8px;
+    border: 1px solid rgba(240, 176, 86, 0.3);
+    border-radius: 2px;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .howto-pill::before { content: '▶  '; opacity: 0.65; }
+  .howto-text strong { color: var(--ink); font-weight: 500; }
+  .howto-text kbd {
+    display: inline-block;
+    padding: 1px 6px;
+    background: var(--bg-3);
+    border: 1px solid var(--line-2);
+    border-bottom-width: 2px;
+    border-radius: 2px;
+    font: inherit;
+    font-size: 10px;
+    color: var(--amber);
+    margin: 0 1px;
+  }
+
+  .screen {
+    position: relative;
+    border: 1px solid var(--line-2);
+    border-radius: 3px;
+    overflow: hidden;
+    background: #fff;
+    aspect-ratio: 1 / 1;
+  }
+  #base {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    image-rendering: pixelated;
+    display: block;
+  }
+  #overlay-cv {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    pointer-events: auto;
+  }
+  .thinking-overlay {
+    position: absolute; inset: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 30;
+    pointer-events: none;
+  }
+  .thinking-overlay.active { display: flex; }
+  .thinking-bg {
+    position: absolute; inset: 0;
+    background: rgba(64, 232, 208, 0.06);
+    animation: thinking-bg-pulse 1.6s ease-in-out infinite;
+  }
+  @keyframes thinking-bg-pulse {
+    0%, 100% { background: rgba(64, 232, 208, 0.04); box-shadow: inset 0 0 0 1px rgba(64, 232, 208, 0.15); }
+    50%      { background: rgba(64, 232, 208, 0.10); box-shadow: inset 0 0 0 1px rgba(64, 232, 208, 0.45); }
+  }
+  .thinking-card {
+    position: relative;
+    text-align: center;
+    padding: 12px 22px;
+    border: 1px solid rgba(64, 232, 208, 0.5);
+    background: rgba(8, 10, 18, 0.45);
+    backdrop-filter: blur(1px);
+    box-shadow: 0 0 18px rgba(64, 232, 208, 0.2);
+  }
+  .thinking-spinner {
+    width: 22px; height: 22px;
+    margin: 0 auto 8px;
+    border: 2px solid rgba(64, 232, 208, 0.2);
+    border-top-color: var(--cyan);
+    border-radius: 50%;
+    animation: thinking-spin 0.9s linear infinite;
+  }
+  @keyframes thinking-spin {
+    to { transform: rotate(360deg); }
+  }
+  .thinking-text {
     font-size: 12px;
     font-weight: 500;
+    letter-spacing: 0.18em;
+    color: var(--cyan);
+    text-transform: uppercase;
   }
-  .meta .v.cyan { color: var(--cyan); }
-  .meta .v.amber { color: var(--amber); }
-  article.body {
+  .thinking-sub {
+    margin-top: 4px;
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    color: var(--ink-low);
+    text-transform: uppercase;
+  }
+  .mode-badge {
+    position: absolute;
+    top: 10px; right: 12px;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    color: var(--amber);
+    text-transform: uppercase;
+    pointer-events: none;
+    z-index: 4;
+  }
+  .mode-badge.v9 { color: var(--cyan); }
+  .mode-badge::before { content: '\25CF '; }
+  .scrub-indicator {
+    position: absolute;
+    top: 10px; left: 12px;
+    font-size: 10px;
+    color: var(--ink-low);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    pointer-events: none;
+    z-index: 4;
+    display: none;
+  }
+  .scrub-indicator.active { display: block; color: var(--amber); }
+
+  .timeline-card {
+    margin-top: 12px;
+    background: var(--bg-3);
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    padding: 10px 14px 8px;
+  }
+  .tl-row {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 12px;
+    align-items: center;
+  }
+  .tl-label {
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-low);
+    min-width: 64px;
+  }
+  .tl-slider-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+  .tl-slider-wrap input[type=range] {
+    width: 100%; height: 4px;
+    -webkit-appearance: none;
+    background: var(--line-2);
+    border-radius: 2px;
+    outline: none;
+    position: relative;
+    z-index: 2;
+  }
+  .tl-slider-wrap input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 13px; height: 13px;
+    border-radius: 50%;
+    background: var(--amber);
+    box-shadow: 0 0 6px rgba(240, 176, 86, 0.5);
+    cursor: pointer;
+  }
+  .tl-slider-wrap input[type=range]::-moz-range-thumb {
+    width: 13px; height: 13px;
+    border-radius: 50%;
+    background: var(--amber);
+    box-shadow: 0 0 6px rgba(240, 176, 86, 0.5);
+    cursor: pointer; border: none;
+  }
+  .tl-slider-wrap input[type=range]:disabled::-webkit-slider-thumb {
+    background: var(--line-2); box-shadow: none;
+  }
+  .tl-state {
+    font-size: 10px;
+    color: var(--amber);
+    min-width: 110px;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+  .tl-ticks {
+    position: relative;
+    height: 14px;
+    margin-top: 2px;
+    margin-left: 68px;
+    margin-right: 120px;
+  }
+  .tl-tick {
+    position: absolute; top: 0;
+    width: 1px;
+    background: var(--ink-low);
+    opacity: 0.4;
+  }
+  .tl-tick.minor { height: 4px; }
+  .tl-tick.major {
+    height: 8px;
+    background: var(--amber);
+    opacity: 0.7;
+    width: 1.5px;
+  }
+  .tl-tick-label {
+    position: absolute;
+    top: 8px;
+    font-size: 9px;
+    color: var(--ink-low);
+    transform: translateX(-50%);
+  }
+
+  .panel {
     background: var(--bg-2);
     border: 1px solid var(--line);
     border-radius: 4px;
-    padding: 28px 36px;
-    line-height: 1.8;
+    padding: 14px 14px 12px;
+    font-size: 11px;
+    display: flex;
+    flex-direction: column;
   }
-  article.body h2 {
+  .panel .section { padding: 12px 0; border-bottom: 1px solid var(--line); }
+  .panel .section:first-child { padding-top: 0; }
+  .panel .section:last-child { border-bottom: none; padding-bottom: 0; }
+  .panel .section.telemetry-section {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+  .section-title {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--ink-low);
+    margin-bottom: 8px;
+  }
+
+  .primary-btn {
+    width: 100%;
+    background: transparent;
+    border: 1px solid var(--amber);
+    color: var(--amber);
+    padding: 9px 10px;
+    font: inherit;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    border-radius: 3px;
+    text-transform: uppercase;
+    transition: all 0.15s;
+    margin-top: 6px;
+  }
+  .primary-btn:hover:not(:disabled) {
+    background: var(--amber-soft);
+  }
+  .primary-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+  .secondary-btn {
+    width: 100%;
+    background: transparent;
+    border: 1px solid var(--line-2);
+    color: var(--ink-dim);
+    padding: 6px 10px;
+    font: inherit;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    border-radius: 3px;
+    text-transform: uppercase;
+    transition: all 0.15s;
+    margin-top: 4px;
+  }
+  .secondary-btn:hover:not(:disabled) { border-color: var(--ink-dim); color: var(--ink); }
+  .secondary-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+  .tip { font-size: 10px; color: var(--ink-low); margin-top: 8px; line-height: 1.5; }
+  .secondary-btn.live-ready {
+    border-color: var(--cyan);
+    color: var(--cyan);
+    animation: pulse 1.8s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 0 0 rgba(79, 232, 214, 0); }
+    50% { box-shadow: 0 0 10px rgba(79, 232, 214, 0.3); }
+  }
+
+  .telemetry {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    justify-content: space-between;
+    gap: 4px;
+    margin-top: 2px;
+  }
+  .t-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 6px 9px;
+    background: var(--bg);
+    border-left: 2px solid var(--line);
+    border-radius: 1px;
+  }
+  .t-row .k {
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.13em;
+    color: var(--ink-low);
+  }
+  .t-row .v {
+    font-size: 12px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    color: var(--ink);
+    line-height: 1;
+  }
+  .t-row .v.cyan { color: var(--cyan); }
+  .t-row .v.amber { color: var(--amber); }
+
+  .status-msg {
+    font-size: 11px;
+    color: var(--ink-dim);
+    line-height: 1.55;
+    letter-spacing: 0.02em;
+    word-break: break-word;
+  }
+  .status-msg::before {
+    content: '> ';
+    color: var(--cyan);
+    opacity: 0.7;
+  }
+
+  .explainer {
+    margin-top: 30px;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 20px;
+  }
+  .card {
+    background: var(--bg-2);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 18px 20px;
+    font-size: 12px;
+    line-height: 1.65;
+    color: var(--ink-dim);
+  }
+  .card h3 {
+    color: var(--ink);
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 10px;
+  }
+  .card .num {
+    display: inline-block;
+    font-size: 10px;
+    color: var(--ink-low);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  .card code {
+    background: var(--bg-3);
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-size: 11px;
+    color: var(--cyan);
+  }
+  .card strong { color: var(--ink); font-weight: 500; }
+  .card em { font-style: normal; color: var(--amber); font-weight: 500; }
+  .card p + p { margin-top: 8px; }
+
+  .article {
+    margin-top: 40px;
+    background: var(--bg-2);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 32px 40px;
+    font-size: 13px;
+    line-height: 1.8;
+    color: var(--ink);
+  }
+  .article h2 {
     font-size: 18px;
     font-weight: 700;
     color: var(--cyan);
-    margin-bottom: 14px;
+    letter-spacing: -0.01em;
+    margin-bottom: 16px;
     padding-bottom: 10px;
     border-bottom: 1px solid var(--line);
   }
-  article.body h3 {
-    font-size: 13px;
+  .article h3 {
+    font-size: 14px;
     font-weight: 600;
     color: var(--ink);
     text-transform: uppercase;
     letter-spacing: 0.06em;
-    margin: 22px 0 10px;
+    margin: 24px 0 10px;
   }
-  article.body p { color: var(--ink-dim); margin-bottom: 12px; }
-  article.body p strong { color: var(--ink); font-weight: 500; }
-  article.body p em { font-style: normal; color: var(--cyan); }
-  article.body code {
-    background: var(--bg);
+  .article p { margin-bottom: 12px; color: var(--ink-dim); }
+  .article p strong { color: var(--ink); font-weight: 500; }
+  .article p em { font-style: normal; color: var(--cyan); }
+  .article code {
+    background: var(--bg-3);
     padding: 1px 5px;
     border-radius: 3px;
     font-size: 12px;
     color: var(--amber);
   }
-  article.body a { color: var(--amber); text-decoration: none; border-bottom: 1px dotted var(--amber); }
-  footer {
-    margin-top: 36px;
-    padding-top: 18px;
-    border-top: 1px solid var(--line);
+  .article ul { margin: 8px 0 14px 20px; color: var(--ink-dim); }
+  .article ul li { margin-bottom: 4px; }
+  .article a { color: var(--amber); text-decoration: none; border-bottom: 1px dotted var(--amber); }
+
+  .win-overlay {
+    position: fixed; inset: 0;
+    background: rgba(10, 10, 18, 0.97);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    cursor: pointer;
+    animation: fadeIn 0.4s ease;
+  }
+  @keyframes fadeIn { from { opacity: 0; } }
+  .win-box {
+    background: var(--bg-2);
+    border: 1px solid var(--cyan);
+    border-radius: 6px;
+    padding: 40px 48px;
+    text-align: center;
+    min-width: 380px;
+  }
+  .win-box.human { border-color: var(--amber); }
+  .win-box h2 {
+    font-size: 34px;
+    font-weight: 800;
+    color: var(--cyan);
+    letter-spacing: -0.01em;
+    margin-bottom: 8px;
+  }
+  .win-box.human h2 { color: var(--amber); }
+  .win-box .sub {
     font-size: 11px;
     color: var(--ink-low);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 24px;
+  }
+  .win-box p {
+    font-size: 13px;
+    color: var(--ink-dim);
+    margin-bottom: 20px;
+  }
+  .win-box p span { color: var(--ink); font-weight: 500; }
+  .win-box p .amber { color: var(--amber); }
+  .win-box p .cyan { color: var(--cyan); }
+  .win-box .replay {
+    display: inline-block;
+    border: 1px solid var(--cyan);
+    color: var(--cyan);
+    padding: 10px 32px;
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .win-box.human .replay { border-color: var(--amber); color: var(--amber); }
+  .win-box .replay:hover { background: var(--cyan-soft); }
+  .win-box.human .replay:hover { background: var(--amber-soft); }
+
+  footer {
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 1px solid var(--line);
     display: flex;
     justify-content: space-between;
+    font-size: 11px;
+    color: var(--ink-low);
   }
   footer a { color: var(--amber); text-decoration: none; }
+  footer a:hover { text-decoration: underline; }
+
   @media (max-width: 760px) {
-    .wrap { padding: 18px 14px 48px; }
-    .meta { grid-template-columns: 1fr; }
-    article.body { padding: 20px 18px; }
-    .embed-card iframe { height: 2400px; }
+    .wrap { padding: 16px 12px 48px; max-width: 100%; }
+    header { grid-template-columns: 1fr; gap: 12px; }
+    .meta { text-align: left; }
+    .game { grid-template-columns: 1fr; justify-content: stretch; }
+    .canvas-wrap { width: 100%; }
+    .panel { order: 2; }
+    .canvas-wrap { order: 1; }
+    .explainer { grid-template-columns: 1fr; }
+    .mark { font-size: 20px; }
+    .tag { font-size: 11px; }
+    .article { padding: 20px 18px; }
+    .tl-ticks { margin-right: 0; margin-left: 0; }
   }
 </style>
 </head>
@@ -173,7 +658,7 @@
 
 <div class="wrap">
 
-  <nav class="crumbs">
+  <nav class="breadcrumb">
     <a href="/">~</a>
     <span class="sep">/</span>
     <a href="/#experiments">experiments</a>
@@ -181,78 +666,170 @@
     <span style="color:var(--ink-dim)">relay</span>
   </nav>
 
-  <header class="lead">
-    <h1>
-      <span class="bracket">[</span><span class="accent">relay</span><span class="bracket">]</span>
-      a JEPA plans against you in latent space
-    </h1>
-    <div class="sub">
-      A 26M-param JEPA opponent in a turn-based T-block puzzle.
-      <strong>You push the T into your goal.</strong> The opponent
-      thinks in pure embedding space — no physics simulator at inference.
+  <header>
+    <div class="mark"><span class="bracket">[</span><span class="accent">relay</span><span class="bracket">]</span> turn-based jepa puzzle</div>
+    <div class="tag">Push the T into your goal. JEPA plans its turn in latent space.</div>
+    <div class="meta">
+      <div><span class="k">server</span> <span class="v" id="meta-server">—</span><span class="status-dot off" id="dot-status"></span></div>
+      <div><span class="k">opponent</span> <span class="v" id="meta-engine">jepa</span></div>
+      <div><span class="k">turn</span> <span class="v" id="meta-turn">—</span></div>
     </div>
   </header>
 
-  <div class="meta">
-    <div class="cell"><div class="k">model</div><div class="v">ViT-Tiny encoder + 6-layer AR transformer</div></div>
-    <div class="cell"><div class="k">params</div><div class="v cyan">26M</div></div>
-    <div class="cell"><div class="k">planning</div><div class="v amber">CEM in latent space</div></div>
-  </div>
+  <div class="game">
 
-  <div class="embed-card">
-    <iframe src="https://jepa.waweapps.win/relay/" title="relay live demo" loading="lazy"></iframe>
-    <noscript>
-      <div class="embed-fallback">
-        Live demo at <a href="https://jepa.waweapps.win/relay/">jepa.waweapps.win/relay/</a> — JavaScript required.
+    <div class="canvas-wrap">
+      <div class="score-display">
+        <div class="score-card"><div class="label">your turns</div><div class="val you" id="hud-human">5</div></div>
+        <div class="score-card"><div class="label">jepa turns</div><div class="val jepa" id="hud-jepa">5</div></div>
+        <div class="score-card"><div class="label">next</div><div class="val next" id="hud-next">—</div></div>
       </div>
-    </noscript>
+
+      <div class="howto">
+        <span class="howto-pill">how to play</span>
+        <span class="howto-text">Click <strong>up to 3 points</strong> on the board to draw your path — your turn ends on the 3rd click (or press <kbd>GO</kbd> sooner). Push the T into your goal.</span>
+      </div>
+
+      <div class="screen" id="game">
+        <img id="base" alt="scene" />
+        <canvas id="overlay-cv" width="512" height="512"></canvas>
+        <div class="mode-badge v9" id="mode-badge">JEPA</div>
+        <div class="scrub-indicator" id="scrub-indicator">SCRUB</div>
+        <div class="thinking-overlay" id="thinking-overlay">
+          <div class="thinking-bg"></div>
+          <div class="thinking-card">
+            <div class="thinking-spinner"></div>
+            <div class="thinking-text">JEPA IS THINKING</div>
+            <div class="thinking-sub">running CEM in latent space</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="timeline-card">
+        <div class="tl-row">
+          <div class="tl-label">timeline</div>
+          <div class="tl-slider-wrap">
+            <input type="range" id="global-slider" min="0" max="0" value="0" step="1" disabled />
+          </div>
+          <div class="tl-state" id="global-state">—</div>
+        </div>
+        <div class="tl-ticks" id="global-ticks"></div>
+      </div>
+    </div>
+
+    <div class="panel">
+
+      <div class="section">
+        <div class="section-title">your turn</div>
+        <button id="btn-go" class="primary-btn" disabled>GO (enter)</button>
+        <button id="btn-clear" class="secondary-btn" disabled>clear aim</button>
+        <button id="btn-live" class="secondary-btn" disabled>back to live</button>
+        <div class="tip">
+          click up to 3 points on the board to aim. each click adds a leg to the path — the agent walks through them in sequence.
+        </div>
+      </div>
+
+      <div class="section telemetry-section">
+        <div class="section-title">telemetry</div>
+        <div class="telemetry">
+          <div class="t-row"><span class="k">turn</span><span class="v" id="m-turn">—</span></div>
+          <div class="t-row"><span class="k">history</span><span class="v" id="m-history">0</span></div>
+          <div class="t-row"><span class="k">last plan cost</span><span class="v cyan" id="m-cost">—</span></div>
+          <div class="t-row"><span class="k">your progress</span><span class="v amber" id="m-human-progress">—</span></div>
+          <div class="t-row"><span class="k">jepa progress</span><span class="v cyan" id="m-jepa-progress">—</span></div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">status</div>
+        <div class="status-msg" id="status">click "new match" to begin.</div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">match</div>
+        <button id="btn-new" class="secondary-btn">new match</button>
+      </div>
+
+    </div>
   </div>
 
-  <article class="body">
-    <h2>what's happening</h2>
+  <div class="log" id="log" style="display:none"></div>
+
+  <div class="explainer">
+    <div class="card">
+      <span class="num">01</span>
+      <h3>pixels in, plan out</h3>
+      <p>
+        For each candidate action sequence, the model <strong>encodes</strong> the 3-frame pixel history, <strong>predicts</strong> the embedding of the final state after 5 env steps, and scores it against the <em>goal embedding</em> (the scene with the T-block at JEPA's target, encoded the same way). The planner refits the sampling distribution over 6 iterations — <strong>CEM in latent space</strong>.
+      </p>
+    </div>
+    <div class="card">
+      <span class="num">02</span>
+      <h3>no simulator at inference</h3>
+      <p>
+        The opponent never runs <code>pymunk</code> while planning. Every candidate move is scored by passing it through the trained model — encode the current pixels, predict the resulting embedding, compare against the goal embedding. <strong>No physics engine on the model's side.</strong>
+      </p>
+      <p>
+        Classical pymunk only runs to <em>execute</em> the chosen move so you see real collisions. The reasoning is pure latent space.
+      </p>
+    </div>
+    <div class="card">
+      <span class="num">03</span>
+      <h3>timeline replay</h3>
+      <p>
+        Every turn is recorded — 5 dream steps per JEPA turn, 5 physics steps per your turn. The scrubber below the canvas shows all of them as minor ticks; major cyan ticks mark turn boundaries. Drag to inspect any past state. <code>esc</code> returns to live.
+      </p>
+    </div>
+  </div>
+
+  <article class="article">
+    <h2>how relay actually works</h2>
 
     <p>
-      <strong>Joint Embedding Predictive Architecture</strong> (JEPA) is Yann LeCun's framework for world models that predict in a compact latent space instead of generating pixels. Fast enough for real-time planning, small enough to train in hours on one GPU.
+      <strong>What is JEPA?</strong> Joint Embedding Predictive Architecture — Yann LeCun's framework for world models that predict in a <strong>compact latent space</strong> instead of generating pixels. Fast enough for real-time planning, small enough to train in hours on one GPU.
+    </p>
+    <p>
+      <strong>This experiment:</strong> you click where you want your agent to push the T-block (<em>amber</em>), commit, and watch the physics play out. Then the JEPA opponent (<em>cyan</em>) plans its turn — runs <strong>CEM in the model's latent space</strong>, scoring each candidate action sequence against a goal embedding, without ever simulating pymunk.
+    </p>
+    <p>
+      RELAY is a <strong>JEPA experiment</strong>. The bet is that Joint-Embedding Predictive Architectures — LeCun's "post-LLM" path — can drive interactive game engines and game mechanics on CPU at interactive rates, with physical coherence, without a simulator at inference time on the model's side. This page is proof it works on a turn-based T-block puzzle.
     </p>
 
+    <h3>the game</h3>
     <p>
-      <strong>The puzzle:</strong> two balls, a T-shaped block, two goals on opposite sides of the board. You (amber) push the T toward your goal — the opponent (cyan) pushes toward its own. 5 turns each, 5 environment steps per turn. Whoever has the T closer to their goal at match-end wins. Classical pymunk physics simulates collisions for execution; the model is only ever used for <em>planning</em>.
-    </p>
-
-    <p>
-      <strong>What the JEPA does each turn:</strong> encode the last 3 frames of pixels into a 192-dim latent, sample 96 candidate action sequences, predict each one's terminal embedding through the autoregressive transformer, decode each predicted state back to (x, y) positions via a small MLP head, score on <code>‖agent − T‖ + 2·‖T − goal‖</code>. Top 15% = elites, refit Gaussian, repeat 6 iterations. Best plan executes. <strong>No simulator on the model's side.</strong>
-    </p>
-
-    <h3>why "retrained" matters</h3>
-
-    <p>
-      The first version of this model failed in a specific, instructive way: its training data alternated <em>which ball was acting</em> on every single frame, but real gameplay has each ball act for a full 5-frame turn at a time. The temporal structure didn't match, and the model never cleanly learned which thrust belonged to which ball. Cross-agent leakage on every prediction.
-    </p>
-
-    <p>
-      The fix was a one-line change in the data generator (<code>who = 'p1' if ((t // 5) % 2 == 0) else 'p2'</code>) plus retraining the position decoder on uniformly-random scenes (Silent's recipe — frozen encoder + post-hoc head trained on uniform samples instead of rollout-distribution samples). Position decode error dropped from <strong>~45 px to ~10 px on agents</strong>, and average planning error dropped from 54 px to 47 px on the calibration probe. <strong>Lesson: in turn-based games, training data has to match the temporal structure of gameplay.</strong>
+      Two agents (pink/blue), a T-shaped block, two colored goals. You (amber dot) push the T toward <em>your</em> goal. JEPA (cyan dot) pushes toward <em>its</em> goal. 5 turns each, 5 environment steps per turn. Whoever gets the T closer to their goal at match-end wins. Classical pymunk physics for the actual simulation — the model is only used for <strong>planning</strong>.
     </p>
 
     <h3>the stack</h3>
+    <p>The model itself follows the LeWM paper byte-for-byte: a 6M-param ViT-Tiny encoder trained from scratch, a 6-layer AR transformer predictor, and only two losses — next-embedding MSE plus <strong>SIGReg</strong> (the regularizer that prevents embedding collapse without any of the usual stabilization tricks). On top of that we add a <strong>DexWM-style joint state head</strong> (a small MLP that decodes positions from embeddings) trained alongside the predictor — it's what lets the planner reason about real-world distances instead of raw latent geometry.</p>
 
+    <h3>training data — the actor-pattern fix</h3>
     <p>
-      Architecture follows the <a href="https://arxiv.org/abs/2603.19312" target="_blank">LeWorldModel paper</a> byte-for-byte: a 6M-param ViT-Tiny encoder trained from scratch, a 6-layer AR transformer predictor with AdaLN modulation, two losses — next-embedding MSE plus <strong>SIGReg</strong> (Sketch Isotropic Gaussian Regularizer, the trick that prevents embedding collapse without any of the usual stabilization knobs). On top: a <strong>DexWM-style joint state head</strong> (small MLP: 192 → 256 → 256 → 8) trained alongside the predictor — it's what lets the planner reason about real-world distances instead of raw latent geometry.
+      In a 2-player turn-based game, the model has to learn <em>which ball belongs to which thrust</em>. That depends on how the training data is structured. Our first attempt alternated which ball was acting on every single frame — but at gameplay time, each player acts for a full 5-frame turn. The temporal structure didn't match, and the model never cleanly attributed actions to balls.
+    </p>
+    <p>
+      The fix: regenerate the data so each ball acts for a full 5-frame turn at a time, matching real gameplay. We also retrained the position decoder on uniformly-random scenes (rather than rollouts) so it sees the full latent geometry the planner queries. <strong>Position decode error dropped from ~45 px to ~10 px on agents</strong>, and average planning error dropped from 54 px to 47 px (-13%).
+    </p>
+    <p style="font-size:11px;color:var(--ink-low);">
+      Lesson: in turn-based games, your training data has to <em>match the temporal structure of gameplay</em>, or the model never learns which thrust belongs to which ball.
     </p>
 
+    <h3>sigreg — the one trick</h3>
     <p>
-      Training data: 12,500 episodes × 40 steps × 5 regimes (<code>contact_push</code> 40%, <code>approach_no_push</code> 25%, <code>null_thrust</code> 15%, <code>near_t</code> 10%, <code>far_from_t</code> 10%). 500K frames at 224×224 RGB. ~10 epochs from scratch on one RTX 4090, ~$3 / 75 minutes.
+      The whole LeWM claim is that stable JEPA from pixels needs only <strong>one</strong> extra loss term: <strong>SIGReg</strong> (Sketch Isotropic Gaussian Regularizer). Project embeddings onto 1024 random 1D directions, run an Epps-Pulley characteristic-function test on each, penalize deviation from Gaussian. Embeddings can't collapse because collapsed embeddings fail the test by construction.
     </p>
 
-    <h3>what relay proves</h3>
-
+    <h3>the planner</h3>
     <p>
-      Each demo in this series stacks toward a bigger thesis. <a href="lepong.html">lepong</a> showed JEPA can track a ball from occluded pixels. <strong>relay</strong> shows JEPA can plan strategically against a human opponent in turn-based puzzle mechanics — opponent takes ~2 seconds per turn on CPU, no GPU needed at inference. Everything runs on a $14/month Hetzner box.
+      At inference, for JEPA's turn: encode the last 3 frames (stride 5 env-steps apart), render a <strong>goal frame</strong> (scene with T placed at JEPA's target, agents held at their current positions), encode that too. Then run <strong>CEM</strong>: sample 96 action sequences from a Gaussian, pass each through the predictor once, score each by MSE between the predicted final embedding and the goal embedding. Take the top 15% as elites, refit mean+std, repeat 6 iterations. Return the best sequence.
+    </p>
+    <p>
+      The entire loop runs on CPU at interactive rates. No pymunk on the model's side — purely latent-space reasoning.
     </p>
 
-    <p style="font-size:11px;color:var(--ink-low);margin-top:18px;">
-      Source: <a href="https://github.com/SotoAlt/relay-deploy" target="_blank">github.com/SotoAlt/relay-deploy</a>.
-      Inference VPS: <a href="https://github.com/SotoAlt/jepa-vps-proxy" target="_blank">github.com/SotoAlt/jepa-vps-proxy</a>.
-      Live at <a href="https://jepa.waweapps.win/relay/" target="_blank">jepa.waweapps.win/relay/</a>.
+    <h3>credits &amp; sources</h3>
+    <p>
+      LeWorldModel paper: <a href="https://arxiv.org/abs/2603.19312" target="_blank">arxiv 2603.19312</a> (Maes, Le Lidec, Scieur, LeCun, Balestriero, 2026). DexWM joint state head: <a href="https://arxiv.org/abs/2512.13644" target="_blank">arxiv 2512.13644</a>. Source: <a href="https://github.com/SotoAlt/relay-deploy" target="_blank">github.com/SotoAlt/relay-deploy</a>.
     </p>
   </article>
 
@@ -263,5 +840,588 @@
 
 </div>
 
+<div class="win-overlay" id="win-overlay">
+  <div class="win-box" id="win-box">
+    <h2 id="win-title">JEPA WINS</h2>
+    <div class="sub" id="win-sub">match complete</div>
+    <p>you <span class="amber" id="win-you">—</span> &middot; jepa <span class="cyan" id="win-jepa">—</span></p>
+    <div class="replay" id="win-replay">new match</div>
+  </div>
+</div>
+
+<script>
+// Production: dedicated JEPA inference VPS via Caddy reverse proxy
+// (jepa.waweapps.win @ 5.78.111.179, see SotoAlt/jepa-vps-proxy).
+// Local dev: connects to the relay server directly on the same host.
+const WS_URL = (location.hostname === 'sotoalt.dev')
+  ? 'wss://jepa.waweapps.win/relay/ws'
+  : (location.protocol === 'https:' ? 'wss:' : 'ws:') + '//' + location.host + '/ws';
+
+const VIEW = 512;
+const MAX_TARGETS = 3;
+
+const img = document.getElementById('base');
+const cvs = document.getElementById('overlay-cv');
+const ctx = cvs.getContext('2d');
+const statusEl = document.getElementById('status');
+const logEl = document.getElementById('log');
+const hudHuman = document.getElementById('hud-human');
+const hudJepa = document.getElementById('hud-jepa');
+const hudNext = document.getElementById('hud-next');
+const metaServer = document.getElementById('meta-server');
+const metaEngine = document.getElementById('meta-engine');
+const metaTurn = document.getElementById('meta-turn');
+const metaPlanner = document.getElementById('meta-planner');
+const dotStatus = document.getElementById('dot-status');
+const mTurn = document.getElementById('m-turn');
+const mHistory = document.getElementById('m-history');
+const mCost = document.getElementById('m-cost');
+const mHumanProgress = document.getElementById('m-human-progress');
+const mJepaProgress = document.getElementById('m-jepa-progress');
+const btnNew = document.getElementById('btn-new');
+const btnGo = document.getElementById('btn-go');
+const btnClear = document.getElementById('btn-clear');
+const btnLive = document.getElementById('btn-live');
+const modeBadge = document.getElementById('mode-badge');
+const scrubIndicator = document.getElementById('scrub-indicator');
+const thinkingOverlay = document.getElementById('thinking-overlay');
+
+function showThinking() { if (thinkingOverlay) thinkingOverlay.classList.add('active'); }
+function hideThinking() { if (thinkingOverlay) thinkingOverlay.classList.remove('active'); }
+const globalSlider = document.getElementById('global-slider');
+const globalState = document.getElementById('global-state');
+const globalTicks = document.getElementById('global-ticks');
+const winOverlay = document.getElementById('win-overlay');
+const winBox = document.getElementById('win-box');
+const winTitle = document.getElementById('win-title');
+const winSub = document.getElementById('win-sub');
+const winYou = document.getElementById('win-you');
+const winJepa = document.getElementById('win-jepa');
+const winReplay = document.getElementById('win-replay');
+
+const STEPS_PER_TURN = 5;
+
+let ws = null;
+let state = null;
+let matchCtx = null;
+let hoverPt = null;
+let targets = [];
+let lastTrail = null;
+let liveFrame = null;
+
+let matchHistory = [];
+let currentTurnBuffer = null;
+let scrubbing = false;
+let scrubTurnIdx = null;
+let scrubStepIdx = null;
+let engineMode = 'jepa_v9';
+
+function log(msg) {
+  const t = new Date().toISOString().split('T')[1].slice(0, 8);
+  const el = document.createElement('div');
+  el.className = 'log-entry';
+  el.textContent = `[${t}] ${msg}`;
+  logEl.appendChild(el);
+  logEl.scrollTop = logEl.scrollHeight;
+}
+
+function connect() {
+  ws = new WebSocket(WS_URL);
+  ws.onopen = () => {
+    log('ws connected');
+    statusEl.textContent = 'connected. starting match…';
+    if (metaServer) metaServer.textContent = 'connected';
+    if (dotStatus) dotStatus.classList.remove('off');
+    send({ type: 'new_match', stage: 1, seed: Math.floor(Math.random() * 10000) });
+  };
+  ws.onmessage = (ev) => handle(JSON.parse(ev.data));
+  ws.onclose = () => {
+    log('ws disconnected');
+    statusEl.textContent = 'disconnected.';
+    if (metaServer) metaServer.textContent = 'offline';
+    if (dotStatus) dotStatus.classList.add('off');
+  };
+  ws.onerror = () => log('ws error');
+}
+
+function send(obj) {
+  if (!ws || ws.readyState !== WebSocket.OPEN) return;
+  ws.send(JSON.stringify(obj));
+}
+
+function setFrame(b64) { img.src = 'data:image/png;base64,' + b64; }
+
+function updateModeBadge() {
+  modeBadge.textContent = 'JEPA';
+  modeBadge.classList.add('v9');
+  metaEngine.textContent = 'jepa';
+}
+
+function updateHud() {
+  if (!matchCtx) return;
+  const humanTurns = matchCtx.human_is === 'p1' ? matchCtx.p1_turns_left : matchCtx.p2_turns_left;
+  const jepaTurns = matchCtx.jepa_is === 'p1' ? matchCtx.p1_turns_left : matchCtx.p2_turns_left;
+  hudHuman.textContent = humanTurns;
+  hudJepa.textContent = jepaTurns;
+  hudNext.textContent = matchCtx.next_turn === 'human' ? 'YOU' :
+                        matchCtx.next_turn === 'jepa' ? 'JEPA' : '—';
+  if (matchCtx.turn_no !== undefined) {
+    metaTurn.textContent = `t${matchCtx.turn_no}`;
+    mTurn.textContent = `t${matchCtx.turn_no}`;
+  }
+  mHistory.textContent = matchHistory.length;
+
+  const live = !scrubbing;
+  const canDraw = live && matchCtx.next_turn === 'human';
+  btnClear.disabled = !(canDraw && targets.length > 0);
+  btnGo.disabled = !(canDraw && targets.length > 0);
+  btnLive.disabled = live;
+  btnLive.classList.toggle('live-ready', !live);
+
+  if (!live) {
+    statusEl.textContent =
+      `scrubbing — turn ${scrubTurnIdx + 1} · step ${scrubStepIdx + 1}/${STEPS_PER_TURN}`;
+    return;
+  }
+  if (canDraw) {
+    if (targets.length === 0) {
+      statusEl.textContent = 'Your turn — click up to 3 points, then GO / Enter.';
+    } else {
+      statusEl.textContent = `${targets.length}/3 leg(s) placed. GO / Enter to commit.`;
+    }
+  } else if (matchCtx.next_turn === 'jepa') {
+    statusEl.textContent = 'JEPA is dreaming…';
+  }
+}
+
+function agentPos() {
+  if (!state || !matchCtx) return { x: 256, y: 256 };
+  return matchCtx.human_is === 'p1'
+    ? { x: state[0], y: state[1] }
+    : { x: state[4], y: state[5] };
+}
+
+function beginTurn(whoNext, turnNo) {
+  currentTurnBuffer = { who: whoNext, turn_no: turnNo, step_frames: [] };
+}
+
+function totalSlots() { return matchHistory.length * STEPS_PER_TURN; }
+
+function pushMatchEntry(entry) {
+  matchHistory.push(entry);
+  const max = Math.max(0, totalSlots() - 1);
+  globalSlider.max = max;
+  globalSlider.value = max;
+  globalSlider.disabled = matchHistory.length < 1;
+  renderTicks();
+  updateGlobalStateLabel(max);
+}
+
+function updateGlobalStateLabel(globalIdx) {
+  if (matchHistory.length === 0) { globalState.textContent = '—'; return; }
+  const turnIdx = Math.floor(globalIdx / STEPS_PER_TURN);
+  const stepIdx = globalIdx % STEPS_PER_TURN;
+  const e = matchHistory[Math.min(turnIdx, matchHistory.length - 1)];
+  const endMark = stepIdx === STEPS_PER_TURN - 1 ? ' · end' : '';
+  globalState.textContent = `T${e.turn_no} · ${e.who.toUpperCase()} · s${stepIdx + 1}/${STEPS_PER_TURN}${endMark}`;
+}
+
+function renderTicks() {
+  globalTicks.innerHTML = '';
+  const n = matchHistory.length;
+  if (n === 0) return;
+  const total = totalSlots();
+  for (let t = 0; t < n; t++) {
+    const globalIdx = t * STEPS_PER_TURN + (STEPS_PER_TURN - 1);
+    const pct = total <= 1 ? 100 : (globalIdx / (total - 1)) * 100;
+    const major = document.createElement('div');
+    major.className = 'tl-tick major';
+    major.style.left = pct + '%';
+    globalTicks.appendChild(major);
+    const lbl = document.createElement('div');
+    lbl.className = 'tl-tick-label';
+    lbl.style.left = pct + '%';
+    lbl.textContent = `T${t + 1}`;
+    globalTicks.appendChild(lbl);
+    for (let s = 0; s < STEPS_PER_TURN - 1; s++) {
+      const gi = t * STEPS_PER_TURN + s;
+      const p = total <= 1 ? 0 : (gi / (total - 1)) * 100;
+      const minor = document.createElement('div');
+      minor.className = 'tl-tick minor';
+      minor.style.left = p + '%';
+      globalTicks.appendChild(minor);
+    }
+  }
+}
+
+function enterScrub(globalIdx) {
+  if (matchHistory.length === 0) return;
+  const max = totalSlots() - 1;
+  globalIdx = Math.max(0, Math.min(max, globalIdx));
+  const turnIdx = Math.floor(globalIdx / STEPS_PER_TURN);
+  const stepIdx = globalIdx % STEPS_PER_TURN;
+  const entry = matchHistory[turnIdx];
+  scrubbing = true;
+  scrubTurnIdx = turnIdx;
+  scrubStepIdx = stepIdx;
+  let frameB64 = entry.frame;
+  if (entry.step_frames && entry.step_frames.length > 0) {
+    const sIdx = Math.min(stepIdx, entry.step_frames.length - 1);
+    frameB64 = entry.step_frames[sIdx].frame;
+  }
+  setFrame(frameB64);
+  lastTrail = entry.trail ? entry.trail.map(p => ({ x: p[0], y: p[1] })) : null;
+  drawOverlay();
+  updateGlobalStateLabel(globalIdx);
+  scrubIndicator.classList.add('active');
+  updateHud();
+}
+
+function exitScrub() {
+  scrubbing = false;
+  scrubTurnIdx = null;
+  scrubStepIdx = null;
+  scrubIndicator.classList.remove('active');
+  if (liveFrame) setFrame(liveFrame);
+  drawOverlay();
+  updateHud();
+  if (matchHistory.length > 0) {
+    const max = totalSlots() - 1;
+    globalSlider.value = max;
+    updateGlobalStateLabel(max);
+  }
+}
+
+function showWinOverlay(m) {
+  const humanWon = m.winner === 'human';
+  const draw = m.winner === 'draw';
+  winTitle.textContent = draw ? 'DRAW' : humanWon ? 'YOU WIN' : 'JEPA WINS';
+  winBox.classList.toggle('human', humanWon || draw);
+  winSub.textContent = 'match complete';
+  winYou.textContent = m.human_distance.toFixed(1);
+  winJepa.textContent = m.jepa_distance.toFixed(1);
+  if (mHumanProgress) mHumanProgress.textContent = m.human_distance.toFixed(1);
+  if (mJepaProgress) mJepaProgress.textContent = m.jepa_distance.toFixed(1);
+  winOverlay.style.display = 'flex';
+  winOverlay.style.opacity = '1';
+}
+
+function hideWinOverlay() {
+  winOverlay.style.opacity = '0';
+  winOverlay.style.transition = 'opacity 0.3s';
+  setTimeout(() => { winOverlay.style.display = 'none'; }, 300);
+}
+
+function handle(m) {
+  if (m.type === 'mode_set') {
+    engineMode = m.mode;
+    updateModeBadge();
+    log(`engine=${m.mode}`);
+    return;
+  }
+  if (m.type === 'mode_error') {
+    log(`mode error: ${m.msg}`);
+    return;
+  }
+  if (m.type === 'state' && m.event === 'new_match') {
+    matchCtx = m;
+    state = m.state;
+    lastTrail = null;
+    targets = [];
+    hoverPt = null;
+    matchHistory = [];
+    currentTurnBuffer = null;
+    scrubbing = false;
+    scrubTurnIdx = null;
+    scrubStepIdx = null;
+    globalSlider.max = 0;
+    globalSlider.value = 0;
+    globalSlider.disabled = true;
+    globalState.textContent = '—';
+    globalTicks.innerHTML = '';
+    scrubIndicator.classList.remove('active');
+    hideWinOverlay();
+    liveFrame = m.frame;
+    setFrame(m.frame);
+    drawOverlay();
+    updateHud();
+    beginTurn(m.next_turn, (m.turn_no || 0) + 1);
+    log(`new match stage ${m.stage}  next=${m.next_turn}`);
+  } else if (m.type === 'step_frame') {
+    state = m.state;
+    liveFrame = m.frame;
+    if (currentTurnBuffer) {
+      currentTurnBuffer.step_frames.push({ frame: m.frame, state: m.state });
+    }
+    if (!scrubbing) {
+      setFrame(m.frame);
+      drawOverlay();
+    }
+  } else if (m.type === 'turn_result') {
+    Object.assign(matchCtx, {
+      p1_turns_left: m.p1_turns_left,
+      p2_turns_left: m.p2_turns_left,
+      next_turn: m.next_turn,
+      turn_no: m.turn_no,
+    });
+    state = m.state;
+    liveFrame = m.frame;
+    const trail = m.trail ? m.trail.map(p => ({ x: p[0], y: p[1] })) : null;
+
+    const entry = {
+      turn_no: m.turn_no,
+      who: m.who_acted,
+      state: m.state,
+      frame: m.frame,
+      trail: m.trail || null,
+      step_frames: currentTurnBuffer ? currentTurnBuffer.step_frames : [],
+    };
+    pushMatchEntry(entry);
+    beginTurn(m.next_turn, m.turn_no + 1);
+
+    if (!scrubbing) {
+      lastTrail = trail;
+      targets = [];
+      hoverPt = null;
+      setFrame(m.frame);
+      drawOverlay();
+    }
+    updateHud();
+    log(`${m.who_acted} turn done; next=${m.next_turn}`);
+    if (m.who_acted === 'human' && matchCtx.next_turn === 'jepa' && !scrubbing) {
+      statusEl.textContent = 'JEPA is dreaming…';
+      showThinking();
+      setTimeout(() => send({ type: 'jepa_turn' }), 300);
+    }
+  } else if (m.type === 'jepa_plan') {
+    hideThinking();
+    if (metaPlanner) metaPlanner.textContent = `${m.samples.length}s c=${m.best_cost.toFixed(2)}`;
+    if (mCost) mCost.textContent = m.best_cost.toFixed(3);
+    log(`JEPA dream: ${m.samples.length} samples  best_cost=${m.best_cost.toFixed(3)}`);
+    if (!scrubbing) animateDreamField(m.samples);
+  } else if (m.type === 'match_over') {
+    liveFrame = m.frame;
+    if (m.who_acted && currentTurnBuffer && currentTurnBuffer.step_frames.length > 0) {
+      pushMatchEntry({
+        turn_no: m.turn_no || matchHistory.length + 1,
+        who: m.who_acted,
+        state: m.state || state,
+        frame: m.frame,
+        trail: m.trail || null,
+        step_frames: currentTurnBuffer.step_frames,
+      });
+    }
+    if (!scrubbing) {
+      state = m.state || state;
+      setFrame(m.frame);
+      drawOverlay();
+    }
+    statusEl.textContent =
+      `MATCH OVER — ${m.winner.toUpperCase()} wins.  you=${m.human_distance.toFixed(1)}  jepa=${m.jepa_distance.toFixed(1)}`;
+    log(`match over: winner=${m.winner}`);
+    showWinOverlay(m);
+  }
+}
+
+function drawOverlay() {
+  ctx.clearRect(0, 0, VIEW, VIEW);
+
+  if (lastTrail && lastTrail.length > 0) {
+    ctx.strokeStyle = 'rgba(240, 160, 48, 0.55)';
+    ctx.fillStyle = 'rgba(240, 160, 48, 0.9)';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(lastTrail[0].x, lastTrail[0].y);
+    for (let i = 1; i < lastTrail.length; i++) ctx.lineTo(lastTrail[i].x, lastTrail[i].y);
+    ctx.stroke();
+    lastTrail.forEach(p => {
+      ctx.beginPath(); ctx.arc(p.x, p.y, 3, 0, 2 * Math.PI); ctx.fill();
+    });
+  }
+
+  if (!scrubbing && matchCtx && matchCtx.next_turn === 'human') {
+    drawPlannedPath();
+  }
+}
+
+function expectedLenForSegment(n_steps) { return n_steps * 38; }
+
+function stepAllocation(nSegments) {
+  const total = 5;
+  const base = Math.floor(total / nSegments);
+  const rem = total - base * nSegments;
+  return Array.from({ length: nSegments }, (_, i) => base + (i < rem ? 1 : 0));
+}
+
+function drawPlannedPath() {
+  const nPoints = targets.length + (hoverPt ? 1 : 0);
+  if (nPoints === 0) return;
+  const points = [agentPos(), ...targets];
+  if (hoverPt && targets.length < MAX_TARGETS) points.push(hoverPt);
+  const nSegments = points.length - 1;
+  if (nSegments === 0) return;
+  const allocs = stepAllocation(nSegments);
+
+  ctx.lineWidth = 2;
+  for (let i = 0; i < nSegments; i++) {
+    const from = points[i];
+    const to = points[i + 1];
+    const isHover = hoverPt && i === nSegments - 1 && targets.length < MAX_TARGETS;
+    ctx.strokeStyle = isHover ? 'rgba(240, 160, 48, 0.25)' : 'rgba(240, 160, 48, 0.35)';
+    ctx.setLineDash([5, 5]);
+    ctx.beginPath();
+    ctx.moveTo(from.x, from.y);
+    ctx.lineTo(to.x, to.y);
+    ctx.stroke();
+  }
+  ctx.setLineDash([]);
+
+  let cursor = points[0];
+  for (let i = 0; i < nSegments; i++) {
+    const to = points[i + 1];
+    const dx = to.x - cursor.x, dy = to.y - cursor.y;
+    const mag = Math.hypot(dx, dy);
+    if (mag < 1) { cursor = to; continue; }
+    const ux = dx / mag, uy = dy / mag;
+    const expLen = Math.min(mag, expectedLenForSegment(allocs[i]));
+    const tip = { x: cursor.x + ux * expLen, y: cursor.y + uy * expLen };
+    ctx.strokeStyle = 'rgba(240, 160, 48, 0.95)';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(cursor.x, cursor.y);
+    ctx.lineTo(tip.x, tip.y);
+    ctx.stroke();
+    const ah = 8;
+    ctx.fillStyle = 'rgba(240, 160, 48, 0.95)';
+    ctx.beginPath();
+    ctx.moveTo(tip.x, tip.y);
+    ctx.lineTo(tip.x - ux * ah - uy * ah / 2, tip.y - uy * ah + ux * ah / 2);
+    ctx.lineTo(tip.x - ux * ah + uy * ah / 2, tip.y - uy * ah - ux * ah / 2);
+    ctx.closePath();
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(240, 160, 48, 0.8)';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.arc(tip.x, tip.y, 5, 0, 2 * Math.PI);
+    ctx.stroke();
+    cursor = tip;
+  }
+
+  ctx.fillStyle = 'rgba(240, 160, 48, 0.95)';
+  targets.forEach((p, i) => {
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, 6, 0, 2 * Math.PI);
+    ctx.fill();
+    ctx.fillStyle = '#08080c';
+    ctx.font = 'bold 11px IBM Plex Mono';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(String(i + 1), p.x, p.y);
+    ctx.fillStyle = 'rgba(240, 160, 48, 0.95)';
+  });
+}
+
+async function animateDreamField(samples) {
+  if (!samples || samples.length === 0) return;
+  const costs = samples.map(s => s.cost);
+  const minC = Math.min(...costs), maxC = Math.max(...costs);
+  const iters = Math.max(...samples.map(s => s.iter)) + 1;
+  const byIter = Array.from({ length: iters }, () => []);
+  samples.forEach(s => byIter[s.iter].push(s));
+  for (let i = 0; i < iters; i++) {
+    if (scrubbing) return;
+    ctx.clearRect(0, 0, VIEW, VIEW);
+    for (let j = 0; j <= i; j++) {
+      const a = 0.15 + 0.7 * (j / Math.max(iters - 1, 1));
+      byIter[j].forEach(s => drawSampleArc(s, minC, maxC, a * 0.5));
+    }
+    await sleep(250);
+  }
+  ctx.clearRect(0, 0, VIEW, VIEW);
+  const last = byIter[iters - 1].slice().sort((a, b) => a.cost - b.cost);
+  last.slice(0, 10).forEach(s => drawSampleArc(s, minC, maxC, 0.85));
+  await sleep(400);
+}
+
+function drawSampleArc(sample, minC, maxC, alpha) {
+  const rel = maxC > minC ? (sample.cost - minC) / (maxC - minC) : 0;
+  const r = Math.round(240 * rel + 64 * (1 - rel));
+  const g = Math.round(160 * rel + 232 * (1 - rel));
+  const b = Math.round(48 * rel + 208 * (1 - rel));
+  ctx.strokeStyle = `rgba(${r}, ${g}, ${b}, ${alpha})`;
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  const p0 = sample.t_path[0];
+  ctx.moveTo(p0[0], p0[1]);
+  for (let i = 1; i < sample.t_path.length; i++) ctx.lineTo(sample.t_path[i][0], sample.t_path[i][1]);
+  ctx.stroke();
+}
+
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+function clientToCanvas(e) {
+  const rect = cvs.getBoundingClientRect();
+  return {
+    x: (e.clientX - rect.left) * (VIEW / rect.width),
+    y: (e.clientY - rect.top) * (VIEW / rect.height),
+  };
+}
+
+cvs.addEventListener('mousemove', (e) => {
+  if (scrubbing || !matchCtx || matchCtx.next_turn !== 'human') return;
+  hoverPt = clientToCanvas(e);
+  drawOverlay();
+});
+cvs.addEventListener('mouseleave', () => { hoverPt = null; drawOverlay(); });
+cvs.addEventListener('click', (e) => {
+  if (!matchCtx || matchCtx.next_turn !== 'human') return;
+  if (scrubbing) { exitScrub(); return; }
+  if (targets.length >= MAX_TARGETS) return;
+  targets.push(clientToCanvas(e));
+  hoverPt = null;
+  drawOverlay();
+  updateHud();
+  if (targets.length === MAX_TARGETS) commit();
+});
+
+function commit() {
+  if (scrubbing || !matchCtx || matchCtx.next_turn !== 'human' || targets.length === 0) return;
+  statusEl.textContent = 'Committing…';
+  send({ type: 'human_turn', targets: targets.map(p => [p.x, p.y]) });
+}
+
+btnClear.addEventListener('click', () => {
+  targets = [];
+  drawOverlay();
+  updateHud();
+});
+btnGo.addEventListener('click', commit);
+btnLive.addEventListener('click', exitScrub);
+btnNew.addEventListener('click', () => {
+  send({ type: 'new_match', stage: 1, seed: Math.floor(Math.random() * 10000) });
+});
+
+window.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') commit();
+  if (e.key === 'Escape') {
+    if (scrubbing) exitScrub();
+    else { targets = []; drawOverlay(); updateHud(); }
+  }
+});
+
+winReplay.addEventListener('click', () => {
+  hideWinOverlay();
+  send({ type: 'new_match', stage: 1, seed: Math.floor(Math.random() * 10000) });
+});
+
+globalSlider.addEventListener('input', (e) => {
+  const idx = parseInt(e.target.value, 10);
+  if (isNaN(idx) || matchHistory.length === 0) return;
+  enterScrub(idx);
+});
+
+updateModeBadge();
+connect();
+</script>
 </body>
 </html>
